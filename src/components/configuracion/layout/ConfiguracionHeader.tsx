@@ -23,9 +23,9 @@ export function ConfiguracionHeader({
       <div>
         <div className="flex items-center gap-2">
           <Settings size={18} className="text-slate-700" />
-          <h1 className="text-base font-bold text-slate-900 tracking-tight">
+          <h2 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight">
             Centro de Configuración
-          </h1>
+          </h2>
           <span className="text-slate-300">/</span>
           <span className="text-xs font-semibold text-slate-600">
             {itemActual?.label || "General"}

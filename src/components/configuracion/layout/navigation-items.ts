@@ -65,7 +65,7 @@ export const GRUPOS_CONFIGURACION: GrupoNavegacionConfig[] = [
       {
         id: "apariencia",
         label: "Apariencia & Temas",
-        descripcion: "6 temas cromáticos del sistema comercial",
+        descripcion: "Paletas cromáticas del sistema comercial",
         icon: Palette,
       },
       {

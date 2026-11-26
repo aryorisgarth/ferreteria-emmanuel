@@ -47,13 +47,12 @@ export function Logo({
   className = "",
   prioridad = false,
 }: LogoProps) {
-  // Para fondo oscuro (como navbar o panel de login oscuro), el logo oficial transparente o dark
   const src = variante === "dark" ? "/logo-oficial-dark.png" : "/logo-oficial.png";
-  const defaultHeight = compacto ? "h-9" : "h-11 sm:h-12";
+  const heightClase = className || (compacto ? "h-7 sm:h-7.5" : "h-7.5 sm:h-8");
 
   return (
     <div
-      className={`inline-flex items-center select-none ${className}`}
+      className="inline-flex items-center select-none shrink-0"
       style={{ WebkitPrintColorAdjust: "exact", printColorAdjust: "exact" }}
     >
       <img
@@ -62,7 +61,7 @@ export function Logo({
         width={992}
         height={250}
         loading={prioridad ? "eager" : "lazy"}
-        className={`w-auto object-contain aspect-[992/250] transition-transform duration-150 ${defaultHeight}`}
+        className={`w-auto object-contain aspect-[992/250] transition-transform duration-150 ${heightClase}`}
       />
     </div>
   );

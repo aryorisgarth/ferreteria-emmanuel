@@ -14,11 +14,11 @@ export function ConfiguracionSidebar({
   onCambiarSeccion,
 }: ConfiguracionSidebarProps) {
   return (
-    <aside className="w-64 shrink-0 rounded-lg border border-slate-200/80 bg-white p-3 shadow-xs">
-      <div className="space-y-5">
+    <aside className="w-64 shrink-0 rounded-xl border border-slate-200/90 bg-white p-3 shadow-xs sticky top-[68px] max-h-[calc(100dvh-88px)] overflow-y-auto overscroll-contain select-none">
+      <div className="space-y-4">
         {GRUPOS_CONFIGURACION.map((grupo) => (
           <div key={grupo.titulo} className="space-y-1">
-            <h3 className="px-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            <h3 className="px-2.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
               {grupo.titulo}
             </h3>
             <div className="space-y-0.5">
@@ -33,16 +33,16 @@ export function ConfiguracionSidebar({
                     style={
                       activa
                         ? {
-                            backgroundColor: "var(--theme-primary)",
-                            color: "var(--theme-primary-contrast)",
-                            borderColor: "var(--theme-primary)",
+                            backgroundColor: "var(--theme-primary, #0F172A)",
+                            color: "var(--theme-primary-contrast, #FFFFFF)",
+                            borderColor: "var(--theme-primary, #0F172A)",
                           }
                         : undefined
                     }
-                    className={`group flex w-full items-center justify-between rounded-md px-2.5 py-2 text-left text-xs font-semibold transition-all border ${
+                    className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs font-semibold transition-all border cursor-pointer ${
                       activa
-                        ? "shadow-xs border-transparent"
-                        : "border-transparent text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
+                        ? "shadow-xs border-transparent font-bold"
+                        : "border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 truncate">

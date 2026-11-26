@@ -50,12 +50,12 @@ export function PanelConfiguracion({
       <ConfiguracionHeader seccionActiva={seccionActiva} modoDb={modoDb} />
       <ConfiguracionMobileNav seccionActiva={seccionActiva} onCambiarSeccion={cambiarSeccion} />
 
-      <div className="flex flex-col lg:flex-row gap-5 items-start">
-        <div className="hidden lg:block">
+      <div className="flex flex-col lg:flex-row gap-6 items-start relative">
+        <div className="hidden lg:block shrink-0">
           <ConfiguracionSidebar seccionActiva={seccionActiva} onCambiarSeccion={cambiarSeccion} />
         </div>
 
-        <main className="flex-1 w-full min-w-0">
+        <main className="flex-1 w-full min-w-0 min-h-0">
           {seccionActiva === "empresa" && (
             <ConfiguracionEmpresa empresa={configuracion.empresa} />
           )}
