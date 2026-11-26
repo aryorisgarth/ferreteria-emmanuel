@@ -1,127 +1,135 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { CasaSvgIsometrica } from "./CasaSvgIsometrica";
-import { HerramientasSvgAnimadas } from "./HerramientasSvgAnimadas";
+import { useEffect, useRef, useState } from "react";
+import { Play, Pause, Sun, Sunset, Moon } from "lucide-react";
+import { CapaCimientosAcero } from "./CapaCimientosAcero";
+import { CapaParedesBloques } from "./CapaParedesBloques";
+import { CapaEstructuraTecho } from "./CapaEstructuraTecho";
+import { CapaTechoZinc } from "./CapaTechoZinc";
+import { CapaAberturasYAcabados } from "./CapaAberturasYAcabados";
+import { HerramientasConstruccion } from "./HerramientasConstruccion";
+import { TEMAS, type TemaAmbiente } from "./geometriaIso";
 
-const ETAPAS = [
-  { id: 1, nombre: "Cimientos y Terreno", detalle: "Trazado, excavación y base nivelada" },
-  { id: 2, nombre: "Levantamiento de Paredes", detalle: "Bloques estructurados y dinteles" },
-  { id: 3, nombre: "Estructura del Techo", detalle: "Cerchas de acero y tijeras" },
-  { id: 4, nombre: "Puertas y Ventanas", detalle: "Carpintería y vidrios reflectivos" },
-  { id: 5, nombre: "Acabados e Iluminación", detalle: "Pintura, detalles dorados y energía" },
-];
+const DURACION_CICLO_MS = 25000;
+const TEMA_KEY = "fe_login_tema_ambiente";
 
-interface Props {
-  className?: string;
-  onInteraccion?: () => void;
-}
+export function EscenaConstruccion({ className = "" }: { className?: string }) {
+  const [tiempoRelativo, setTiempoRelativo] = useState<number>(0);
+  const [pausado, setPausado] = useState<boolean>(false);
+  const [tema, setTema] = useState<TemaAmbiente>("dia");
+  const animFrameRef = useRef<number | null>(null);
+  const pausaOffsetRef = useRef<number>(0);
 
-export function EscenaConstruccion({ className = "", onInteraccion }: Props) {
-  const [etapa, setEtapa] = useState<number>(1);
-  const [animando, setAnimando] = useState<boolean>(true);
-
-  // Ciclo automático de construcción progresiva (cada 4.2 segundos cambia de etapa)
   useEffect(() => {
-    // Si el usuario prefiere movimiento reducido, dejamos la casa terminada
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) {
-      setEtapa(5);
-      setAnimando(false);
-      return;
+    // Cargar y persistir tema elegido por el usuario (no se reinicia nunca al acabar el ciclo)
+    const temaGuardado = localStorage.getItem(TEMA_KEY) as TemaAmbiente;
+    if (temaGuardado && (temaGuardado === "dia" || temaGuardado === "atardecer" || temaGuardado === "noche")) {
+      setTema(temaGuardado);
     }
+  }, []);
 
-    if (!animando) return;
-
-    const intervalo = setInterval(() => {
-      setEtapa((prev) => (prev >= 5 ? 1 : prev + 1));
-    }, 4200);
-
-    return () => clearInterval(intervalo);
-  }, [animando]);
-
-  const seleccionarEtapa = (id: number) => {
-    setEtapa(id);
-    setAnimando(false);
-    onInteraccion?.();
+  const cambiarTema = (nuevoTema: TemaAmbiente) => {
+    setTema(nuevoTema);
+    localStorage.setItem(TEMA_KEY, nuevoTema);
   };
 
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) { setTiempoRelativo(0.95); return; }
+
+    let inicio = performance.now() - pausaOffsetRef.current;
+    const actualizar = (ahora: number) => {
+      if (!pausado) {
+        const transcurrido = ahora - inicio;
+        setTiempoRelativo((transcurrido % DURACION_CICLO_MS) / DURACION_CICLO_MS);
+        pausaOffsetRef.current = transcurrido % DURACION_CICLO_MS;
+      }
+      animFrameRef.current = requestAnimationFrame(actualizar);
+    };
+    animFrameRef.current = requestAnimationFrame(actualizar);
+    return () => { if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current); };
+  }, [pausado]);
+
+  const t = TEMAS[tema];
+  const fCimientos = Math.min(1, Math.max(0, tiempoRelativo / 0.25));
+  const fParedes = Math.min(1, Math.max(0, (tiempoRelativo - 0.18) / 0.28));
+  const fTechoEstructura = Math.min(1, Math.max(0, (tiempoRelativo - 0.4) / 0.26));
+  const fTechoZinc = Math.min(1, Math.max(0, (tiempoRelativo - 0.58) / 0.24));
+  const fAberturas = Math.min(1, Math.max(0, (tiempoRelativo - 0.68) / 0.18));
+  const fAcabados = Math.min(1, Math.max(0, (tiempoRelativo - 0.76) / 0.16));
+  // Ventanas abriéndose tras ser colocadas y consolidarse la casa (de 0.85 a 1.0)
+  const aperturaVentanas = Math.min(1, Math.max(0, (tiempoRelativo - 0.85) / 0.12));
+  const fLuces = tiempoRelativo > 0.86 || t.farolLuz;
+
   return (
-    <div className={`relative flex flex-col items-center justify-between overflow-hidden select-none ${className}`}>
-      {/* Fondo técnico / Cuadrícula isométrica blueprint */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-40 pointer-events-none" />
+    <div
+      className={`relative flex items-center justify-center w-full h-full overflow-hidden select-none transition-colors duration-700 ${t.cielo} ${className}`}
+      style={{ background: t.fondoGradiente }}
+    >
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
 
-      {/* Indicador superior de etapa arquitectónica */}
-      <div className="relative z-10 w-full pt-6 px-6 flex flex-col items-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/80 border border-slate-700/80 backdrop-blur-md shadow-lg">
-          <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
-          <span className="text-xs font-semibold tracking-wider uppercase text-amber-400">
-            Etapa {etapa}/5: {ETAPAS[etapa - 1].nombre}
-          </span>
-        </div>
-        <p className="text-[11px] text-slate-400 mt-1 font-mono tracking-tight text-center">
-          {ETAPAS[etapa - 1].detalle}
-        </p>
-      </div>
+      <svg
+        viewBox="0 0 600 480"
+        preserveAspectRatio="xMidYMid meet"
+        className="w-full h-full max-h-[82vh] max-w-[820px] drop-shadow-2xl"
+        aria-label="Vivienda en construcción isométrica"
+      >
+        <defs>
+          <linearGradient id="reflejoZinc" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ffffff" stopOpacity="0.8" /><stop offset="100%" stopColor="#94a3b8" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id="resplandorLuz" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#fef08a" stopOpacity="0.9" /><stop offset="100%" stopColor="#facc15" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="conoLuz" x1="50%" y1="0%" x2="50%" y2="100%">
+            <stop offset="0%" stopColor="#fef08a" stopOpacity="0.6" /><stop offset="100%" stopColor="#facc15" stopOpacity="0" />
+          </linearGradient>
+          <radialGradient id="sombraPiso" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#000000" stopOpacity="0.8" /><stop offset="100%" stopColor="#000000" stopOpacity="0" />
+          </radialGradient>
+        </defs>
 
-      {/* Escena SVG Central */}
-      <div className="relative z-10 flex-1 w-full flex items-center justify-center p-4">
-        <div className="w-full max-w-[560px] aspect-[4/3] relative flex items-center justify-center">
-          <svg
-            viewBox="0 0 600 460"
-            className="w-full h-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.6)] transition-transform duration-700 hover:scale-[1.02]"
-            aria-label={`Visualización isométrica: ${ETAPAS[etapa - 1].nombre}`}
-          >
-            {/* Suelo base isométrico y reflejos */}
-            <defs>
-              <radialGradient id="baseGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="#facc15" stopOpacity="0.12" />
-                <stop offset="100%" stopColor="#facc15" stopOpacity="0" />
-              </radialGradient>
-            </defs>
-            <ellipse cx="300" cy="340" rx="260" ry="90" fill="url(#baseGlow)" />
+        <ellipse cx="300" cy="350" rx="240" ry="85" fill="url(#sombraPiso)" />
+        <CapaCimientosAcero progreso={fCimientos} tema={tema} />
+        <CapaParedesBloques progreso={fParedes} repelloProgreso={fAcabados} tema={tema} />
+        <CapaEstructuraTecho progreso={fTechoEstructura} tema={tema} />
+        <CapaTechoZinc progreso={fTechoZinc} tema={tema} />
+        <CapaAberturasYAcabados
+          aberturasProgreso={fAberturas}
+          acabadosProgreso={fAcabados}
+          lucesEncendidas={fLuces}
+          aperturaVentanas={aperturaVentanas}
+          tema={tema}
+        />
+        <HerramientasConstruccion tiempo={tiempoRelativo} />
+      </svg>
 
-            {/* Casa Isométrica */}
-            <CasaSvgIsometrica etapa={etapa} />
+      <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setPausado(!pausado)}
+          title={pausado ? "Reanudar" : "Pausar"}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-amber-400 border border-slate-800 text-[11px] backdrop-blur-sm cursor-pointer"
+        >
+          {pausado ? <Play size={13} /> : <Pause size={13} />}
+          <span className="hidden sm:inline">{pausado ? "Reanudar" : "Pausar"}</span>
+        </button>
 
-            {/* Herramientas de Ferretería */}
-            <HerramientasSvgAnimadas etapa={etapa} />
-          </svg>
-        </div>
-      </div>
-
-      {/* Barra de progreso interactiva inferior */}
-      <div className="relative z-10 w-full pb-6 px-6 max-w-lg">
-        <div className="flex items-center justify-between gap-2 bg-slate-900/70 p-1.5 rounded-2xl border border-slate-800/80 backdrop-blur-md shadow-xl">
-          {ETAPAS.map((e) => {
-            const activa = etapa === e.id;
-            const completada = etapa > e.id;
+        <div className="flex items-center bg-slate-900/80 p-0.5 rounded-lg border border-slate-800 backdrop-blur-sm">
+          {(["dia", "atardecer", "noche"] as TemaAmbiente[]).map((tm) => {
+            const Icono = tm === "dia" ? Sun : tm === "atardecer" ? Sunset : Moon;
             return (
               <button
-                key={e.id}
-                onClick={() => seleccionarEtapa(e.id)}
-                title={e.nombre}
-                className={`flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold transition-all ${
-                  activa
-                    ? "bg-amber-400 text-slate-950 shadow-md scale-105"
-                    : completada
-                    ? "bg-slate-800 text-amber-300 hover:bg-slate-700"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/40"
-                }`}
+                key={tm}
+                type="button"
+                onClick={() => cambiarTema(tm)}
+                title={TEMAS[tm].nombre}
+                className={`p-1.5 rounded-md cursor-pointer ${tema === tm ? "bg-amber-400 text-slate-950 shadow-sm" : "text-slate-400 hover:text-slate-200"}`}
               >
-                Paso {e.id}
+                <Icono size={13} />
               </button>
             );
           })}
-        </div>
-        <div className="flex justify-between items-center mt-2 px-1 text-[10px] text-slate-400 font-medium">
-          <span>Construcción de Obra Isométrica</span>
-          <button
-            onClick={() => setAnimando(!animando)}
-            className="hover:text-amber-400 transition"
-          >
-            {animando ? "Pausar animación" : "Reanudar animación"}
-          </button>
         </div>
       </div>
     </div>

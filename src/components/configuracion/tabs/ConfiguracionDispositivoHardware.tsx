@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Printer, Barcode, CheckCircle2, RotateCcw } from "lucide-react";
+import { Printer, CheckCircle2, RotateCcw } from "lucide-react";
 import { useConfiguracionDispositivo } from "../hooks/useConfiguracionDispositivo";
+import { SeccionPantallaPWA } from "./SeccionPantallaPWA";
 
 export function ConfiguracionDispositivoHardware() {
   const {
@@ -21,6 +22,10 @@ export function ConfiguracionDispositivoHardware() {
         </div>
       )}
 
+      {/* Sección 1: PWA, Screen Wake Lock y Pantalla */}
+      <SeccionPantallaPWA />
+
+      {/* Sección 2: Terminal Física de Impresión */}
       <div className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-slate-100 pb-3">
           <div className="flex items-center gap-2">
