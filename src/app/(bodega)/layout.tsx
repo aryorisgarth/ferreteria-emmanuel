@@ -23,7 +23,7 @@ export default async function BodegaLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="min-h-screen min-h-dvh bg-[#F8FAFC] flex flex-col w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen min-h-dvh bg-[#F8FAFC] flex flex-col w-full max-w-full overflow-x-clip">
       {/* Barra de Navegación Superior Profesional Oficial */}
       <Navbar usuario={usuario} alertas={alertas} />
 

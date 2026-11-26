@@ -21,7 +21,7 @@ export function PageDocument({
 }) {
   return (
     <article
-      className={`w-full max-w-full overflow-x-hidden px-3.5 py-4 sm:px-6 md:px-8 print:p-0 print:m-0 print:max-w-none ${
+      className={`w-full max-w-full overflow-x-clip px-3.5 py-4 sm:px-6 md:px-8 print:p-0 print:m-0 print:max-w-none ${
         anchoCompleto ? "max-w-none" : "max-w-[1750px] mx-auto"
       }`}
     >
