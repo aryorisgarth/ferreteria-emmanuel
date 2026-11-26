@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Smartphone, Monitor, Sun, Moon, ShieldCheck, Download, AlertCircle } from "lucide-react";
+import { Smartphone, Sun, Download, AlertCircle, Maximize2, Minimize2 } from "lucide-react";
 import { useWakeLockContext } from "@/components/pwa/WakeLockProvider";
+import { useFullscreen } from "@/components/pwa/useFullscreen";
 
 export function SeccionPantallaPWA() {
-  const { soportado, activo, habilitado, toggleWakeLock } = useWakeLockContext();
+  const { soportado: wakeLockSoportado, activo, habilitado, toggleWakeLock } = useWakeLockContext();
+  const { soportado: fullscreenSoportado, esFullscreen, alternarFullscreen } = useFullscreen();
   const [instalado, setInstalado] = useState(false);
   const [esIOS, setEsIOS] = useState(false);
 
@@ -13,6 +15,7 @@ export function SeccionPantallaPWA() {
     if (typeof window !== "undefined") {
       const esStandalone =
         window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
         (window.navigator as any).standalone === true;
       setInstalado(esStandalone);
       setEsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
@@ -40,6 +43,35 @@ export function SeccionPantallaPWA() {
       </div>
 
       <div className="space-y-4">
+        {/* Modo Pantalla Completa Inmersiva */}
+        {fullscreenSoportado && (
+          <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-slate-50 border border-slate-200/60">
+            <div>
+              <div className="flex items-center gap-2">
+                <Maximize2 size={15} className="text-blue-600" />
+                <span className="text-xs font-bold text-slate-800">
+                  Modo Pantalla Completa Inmersiva (Ocultar Barras de Navegador)
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Elimina las barras del navegador y títulos superiores en tablets (Galaxy Tab A9+, iPad) y computadoras POS.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={alternarFullscreen}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
+                esFullscreen
+                  ? "bg-blue-600 text-white shadow-xs"
+                  : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+              }`}
+            >
+              {esFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+              <span>{esFullscreen ? "Salir de Fullscreen" : "Pantalla Completa"}</span>
+            </button>
+          </div>
+        )}
+
         {/* Control Screen Wake Lock */}
         <div className="flex items-start justify-between gap-4 p-3 rounded-lg bg-slate-50 border border-slate-200/60">
           <div>
@@ -52,15 +84,15 @@ export function SeccionPantallaPWA() {
             <p className="text-[11px] text-slate-500 mt-0.5">
               Evita que el mostrador o tablet se apague automáticamente durante las horas de atención comercial.
             </p>
-            {!soportado && (
+            {!wakeLockSoportado && (
               <p className="text-[10px] text-amber-600 mt-1 flex items-center gap-1">
-                <AlertCircle size={12} /> Esta función no es admitida por tu navegador actual o el sistema operativo.
+                <AlertCircle size={12} /> Función no admitida por tu navegador actual o el sistema operativo.
               </p>
             )}
           </div>
           <button
             type="button"
-            disabled={!soportado}
+            disabled={!wakeLockSoportado}
             onClick={toggleWakeLock}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${
               habilitado && activo
@@ -80,11 +112,11 @@ export function SeccionPantallaPWA() {
             </div>
             {esIOS ? (
               <p className="text-[11px] text-blue-800">
-                En Safari iOS: pulsa el botón <strong>Compartir</strong> (icono de cuadrado con flecha hacia arriba) y selecciona <strong>«Agregar al inicio»</strong>.
+                En Safari iOS: pulsa <strong>Compartir</strong> (icono de cuadrado con flecha hacia arriba) y selecciona <strong>«Agregar al inicio»</strong>.
               </p>
             ) : (
               <p className="text-[11px] text-blue-800">
-                En Chrome/Edge (Android/PC): pulsa el menú de tres puntos y selecciona <strong>«Instalar Ferretería Emmanuel»</strong> o pulsa el icono de instalación en la barra de direcciones.
+                En Chrome (Galaxy Tab / Android / PC): pulsa el menú de tres puntos (⋮) y selecciona <strong>«Instalar aplicación»</strong> (no «Agregar a pantalla principal»).
               </p>
             )}
           </div>

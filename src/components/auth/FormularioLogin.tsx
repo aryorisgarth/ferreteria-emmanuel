@@ -7,6 +7,7 @@ import { PanelFormularioLogin } from "./PanelFormularioLogin";
 import { FormularioSolicitarRecuperacion } from "./FormularioSolicitarRecuperacion";
 import { Modal } from "@/components/ui/Modal";
 import { Logo } from "@/components/marca/Logo";
+import { BotonFullscreen } from "@/components/pwa/BotonFullscreen";
 
 interface FormularioLoginProps {
   errorInicial?: string;
@@ -25,18 +26,21 @@ export function FormularioLogin({ errorInicial, volverUrl = "/inicio" }: Formula
           <Logo variante="light" className="h-6 sm:h-8 w-auto" prioridad />
         </div>
 
-        {/* Botón flotante para restaurar login cuando esté oculto */}
-        {!panelVisible && (
-          <button
-            type="button"
-            onClick={() => setPanelVisible(true)}
-            title="Abrir formulario de inicio de sesión"
-            className="pointer-events-auto inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-lg shadow-amber-400/20 border border-amber-300 transition active:scale-95 cursor-pointer"
-          >
-            <LogIn size={15} />
-            <span className="hidden sm:inline">Iniciar Sesión</span>
-          </button>
-        )}
+        {/* Acciones superiores: Botón Fullscreen y Restaurar Login si está oculto */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          <BotonFullscreen />
+          {!panelVisible && (
+            <button
+              type="button"
+              onClick={() => setPanelVisible(true)}
+              title="Abrir formulario de inicio de sesión"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs shadow-lg shadow-amber-400/20 border border-amber-300 transition active:scale-95 cursor-pointer"
+            >
+              <LogIn size={15} />
+              <span className="hidden sm:inline">Iniciar Sesión</span>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* CONTENEDOR FLEXIBLE ADAPTABLE:
