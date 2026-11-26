@@ -76,7 +76,7 @@ INSERT INTO usuarios_cuentas (
     'admin',
     'Administrador General',
     'admin',
-    '$scrypt$s=845edbf5a86c5b421edd750e3a025897$h=5e74355425b29edcccb99599f36f807bb03af5f6e6ae47e3baaf324d052ec06862f5869b82f5a5f6c7efc2fc2c8338c5c50eac87c546b35553aa765d88937fc3',
+    '$scrypt$s=97aefb8f300e82c4e732d7dcc368480f$h=c9094e72726b87e86beb2b55a173d58a04c8d61121f7bba41d7a1ce31de5d7c25b8a0d74398e0a5b1b10ef597ed0ce411ad87bcb8d5940546c8927188e2ab3e1',
     true,
     'admin@ferreteriaemmanuel.com.ni',
     true,
