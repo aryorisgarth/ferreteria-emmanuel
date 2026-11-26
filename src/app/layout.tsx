@@ -36,13 +36,17 @@ export const metadata: Metadata = {
     title: "Emmanuel",
     statusBarStyle: "black-translucent",
   },
+  other: {
+    "mobile-web-app-capable": "yes",
+    "theme-color": "#0F172A",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#1E293B",
+  themeColor: "#0F172A",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
