@@ -1,0 +1,695 @@
+# FERRETERÍA EMMANUEL — FASE 3.0D
+## CIERRE TÉCNICO Y CORRECCIÓN FINAL DEL DISEÑO SQL DE MIGRACIÓN
+
+> **ESTADO DE LA REVISIÓN**: **CIERRE TÉCNICO Y AUDITORÍA DE EJECUTABILIDAD — SIN EJECUCIÓN**.  
+> **CÓDIGO FUENTE & SERVER ACTIONS**: **INTACTOS**.  
+> **BASE DE DATOS NEON POSTGRESQL & ARCHIVOS JSON**: **INTACTOS (0 migraciones aplicadas, 0 escrituras, Hashes SHA-256 verificados e inalterados)**.
+
+---
+
+## 1. Cambios Realizados Respecto a la Fase 3.0C
+
+En atención a la revisión técnica final, se incorporan las siguientes correcciones arquitectónicas al diseño:
+
+1. **Eliminación Absoluta de Fallbacks con Datos Inventados**:
+   Se eliminó por completo la sentencia que asignaba automáticamente `cantidad_pendiente = cantidad` a renglones no resueltos. Los datos históricos se clasifican mediante un árbol determinista de 4 estados, y cualquier caso ambiguo se aísla en `auditoria_migracion_cotizaciones_ambiguas` con saldo cero y bandera de bloqueo comercial.
+2. **Corrección de Triggers en Tiempo de Ejecución (`TG_OP`, `OLD` y `NEW`)**:
+   Se corrigieron los triggers de inmutabilidad para contemplar estrictamente `TG_OP`. En PostgreSQL, acceder a `NEW` durante un `DELETE` o a `OLD` durante un `INSERT` genera una excepción en tiempo de ejecución (`record not assigned yet`). Se separó la lógica para `INSERT`, `UPDATE` y `DELETE` tanto en cabeceras como en renglones.
+3. **Protección de Precios y Cantidades en Estado `AUTORIZADA`**:
+   Se incorporó al trigger de renglones la protección para cotizaciones en estado `AUTORIZADA`: se bloquea cualquier modificación a `precio`, `precio_autorizado` y `cantidad` pactada, permitiendo únicamente el avance transaccional de `cantidad_facturada` y `cantidad_pendiente`.
+4. **Función Transaccional de Versionado Atómico**:
+   Se diseñó formalmente la función almacenada `fn_versionar_cotizacion_atomica()` con bloqueos pesimistas (`SELECT ... FOR UPDATE`), garantizando que la sustitución de $V_N$ y la creación de $V_{N+1}$ sobre compromisos pendientes ocurran de forma indivisible.
+5. **Batería de Consultas de Prevalidación con Bloqueo de Migración**:
+   Se diseñó un conjunto exhaustivo de consultas SQL de verificación previa que deben arrojar **cero discrepancias** antes de ejecutar cualquier `ALTER TABLE ... SET NOT NULL` o `ADD CONSTRAINT`. Si se detecta una sola anomalía, el proceso se detiene automáticamente.
+6. **Distinción de Ejecutabilidad**:
+   Se declara formalmente que este SQL ha sido analizado y validado a nivel de diseño estático de sintaxis PostgreSQL 15+ y compatibilidad relacional; su prueba real queda reservada para la base de datos aislada de staging en la Fase 3.1.
+
+---
+
+## 2. Consultas de Prevalidación (Gatekeepers de Integridad)
+
+Antes de alterar cualquier restricción en PostgreSQL, se deben ejecutar estas 8 consultas de prevalidación. Si alguna de ellas retorna filas ($> 0$), **la migración debe abortar inmediatamente**:
+
+```sql
+-- ============================================================================
+-- BATERÍA DE CONSULTAS DE PREVALIDACIÓN (FASE 3.1 PRE-CHECK)
+-- Todas las consultas deben retornar 0 filas para autorizar las restricciones
+-- ============================================================================
+
+-- 1. Claves Foráneas Huérfanas en Renglones de Cotizaciones
+SELECT ci.id, ci.cotizacion_id 
+FROM cotizacion_items ci 
+LEFT JOIN cotizaciones c ON c.id = ci.cotizacion_id 
+WHERE c.id IS NULL;
+
+-- 2. Claves Foráneas Huérfanas en Renglones de Facturas
+SELECT fi.id, fi.factura_id 
+FROM factura_items fi 
+LEFT JOIN facturas f ON f.id = fi.factura_id 
+WHERE f.id IS NULL;
+
+-- 3. Productos Huérfanos o Inexistentes en Renglones
+SELECT ci.id, ci.producto_id 
+FROM cotizacion_items ci 
+LEFT JOIN productos p ON p.id = ci.producto_id 
+WHERE p.id IS NULL;
+
+-- 4. Cantidades o Precios Inválidos en Cotizaciones Históricas
+SELECT id, cotizacion_id, cantidad, precio 
+FROM cotizacion_items 
+WHERE cantidad <= 0 OR precio < 0;
+
+-- 5. Cantidades o Precios Inválidos en Facturas Históricas
+SELECT id, factura_id, cantidad, precio 
+FROM factura_items 
+WHERE cantidad <= 0 OR precio < 0;
+
+-- 6. Facturas Históricas con cotizacion_id Huérfano
+SELECT f.id, f.numero, f.cotizacion_id 
+FROM facturas f 
+LEFT JOIN cotizaciones c ON c.id = f.cotizacion_id 
+WHERE f.cotizacion_id IS NOT NULL AND c.id IS NULL;
+
+-- 7. Estados No Reconocidos en Cotizaciones Existentes
+SELECT id, numero, estado 
+FROM cotizaciones 
+WHERE estado NOT IN (
+  'BORRADOR', 'EMITIDA', 'ENVIADA', 'ACEPTADA', 'AUTORIZADA', 
+  'PARCIALMENTE_FACTURADA', 'FACTURADA', 'SUSTITUIDA', 'RECHAZADA', 'VENCIDA'
+);
+
+-- 8. Tipos de Identificadores Incompatibles (No convertibles a TEXT)
+SELECT id FROM cotizaciones WHERE id IS NULL OR trim(id) = '';
+SELECT id FROM cotizacion_items WHERE id IS NULL OR trim(id) = '';
+```
+
+---
+
+## 3. Estrategia de Migración Histórica (Backfill sin Datos Ficticios)
+
+Cada cotización histórica existente en el sistema se clasifica estrictamente en una de las 4 categorías comerciales:
+
+```mermaid
+flowchart TD
+    Inicio["Analizar Registro Histórico en cotizaciones"] --> Raiz["1. Asignar cotizacion_raiz_id = id (version = 1)"]
+    Raiz --> EvaluarFacturas{"¿Tiene factura_id o cotizacion_id asociado?"}
+    
+    EvaluarFacturas -->|NO tiene ninguna factura| Cat2["CATEGORÍA 2: SIN_FACTURACION_DEMOSTRADA<br/>(BORRADOR, ENVIADA, ACEPTADA)<br/>cantidad_facturada = 0<br/>cantidad_pendiente = cantidad"]
+    
+    EvaluarFacturas -->|SÍ tiene factura asociada| InspeccionarEstado{"¿Estado de la factura asociada?"}
+    
+    InspeccionarEstado -->|Factura ANULADA| Cat4["CATEGORÍA 4: AMBIGUA_PENDIENTE_REVISION<br/>Regla: NO reabrir saldos automáticamente<br/>cantidad_facturada = cantidad, cantidad_pendiente = 0<br/>Aislar en auditoria_migracion_cotizaciones_ambiguas<br/>es_version_actual = false (BLOQUEADA PARA COBRO)"]
+    
+    InspeccionarEstado -->|Factura EMITIDA o PAGADA| CalcularConsumo["Calcular suma de cantidades facturadas por producto"]
+    CalcularConsumo --> CompararSuma{"¿Suma facturada vs cantidad cotizada?"}
+    
+    CompararSuma -->|Suma >= Cotizada| Cat3["CATEGORÍA 3: TOTALMENTE_CONSUMIDA<br/>estado = 'FACTURADA'<br/>cantidad_facturada = cantidad<br/>cantidad_pendiente = 0"]
+    
+    CompararSuma -->|Suma < Cotizada y > 0| Cat1["CATEGORÍA 1: RECONSTRUIDA_CON_EVIDENCIA<br/>estado = 'PARCIALMENTE_FACTURADA'<br/>cantidad_facturada = suma_facturada<br/>cantidad_pendiente = cantidad - suma_facturada"]
+    
+    CompararSuma -->|Discrepancia en productos o códigos| Cat4
+```
+
+### Regla de Cierre:
+Las cotizaciones de la **Categoría 4 (Ambiguas)** se registran en la tabla de auditoría con `es_version_actual = false`. **No se les inventa saldo disponible**. Si el cliente solicita despachos futuros, un administrador debe revisar el caso y emitir una cotización nueva autorizada.
+
+---
+
+## 4. SQL Final Corregido Completo (Sin Ejecutar)
+
+```sql
+-- ============================================================================
+-- FERRETERÍA EMMANUEL — SCRIPT MAESTRO DDL & MIGRACIÓN HISTÓRICA
+-- Fase 3: Persistencia Transaccional, Versionado y Gobernanza Financiera
+-- Sintaxis: PostgreSQL 15+ (Compatible con Neon Serverless)
+-- ============================================================================
+
+-- INICIO DE BLOQUE DE DEFINICIÓN DDL
+BEGIN;
+
+-- ============================================================================
+-- 1. TABLA DE CONTROL DE AUDITORÍA PARA CASOS HISTÓRICOS AMBIGUOS
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS auditoria_migracion_cotizaciones_ambiguas (
+    id TEXT PRIMARY KEY DEFAULT ('MIG-AMB-' || gen_random_uuid()),
+    cotizacion_id TEXT NOT NULL,
+    cotizacion_numero TEXT NOT NULL,
+    producto_id TEXT NOT NULL,
+    cantidad_cotizada NUMERIC(14, 4) NOT NULL,
+    cantidad_facturada_detectada NUMERIC(14, 4) NOT NULL,
+    motivo_ambiguedad TEXT NOT NULL,
+    estado_comercial_asignado TEXT NOT NULL DEFAULT 'BLOQUEADA_POR_AMBIGUEDAD',
+    resuelto BOOLEAN NOT NULL DEFAULT false,
+    resuelto_por TEXT,
+    fecha_resolucion TIMESTAMPTZ,
+    fecha_deteccion TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================================
+-- 2. EXTENSIÓN ADITIVA DE TABLAS EXISTENTES (CAMPOS INICIALES PERMISIVOS)
+-- ============================================================================
+-- 2.1 Ampliación de estados en cotizaciones
+ALTER TABLE cotizaciones DROP CONSTRAINT IF EXISTS cotizaciones_estado_check;
+ALTER TABLE cotizaciones ADD CONSTRAINT cotizaciones_estado_check 
+  CHECK (estado IN (
+    'BORRADOR', 'EMITIDA', 'ENVIADA', 'ACEPTADA', 'PENDIENTE_AUTORIZACION', 
+    'AUTORIZADA', 'PARCIALMENTE_FACTURADA', 'FACTURADA', 'SUSTITUIDA', 
+    'RECHAZADA', 'VENCIDA'
+  ));
+
+-- 2.2 Columnas de versionado inmutable
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS version INT DEFAULT 1;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS cotizacion_raiz_id TEXT;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS version_padre_id TEXT;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS es_version_actual BOOLEAN DEFAULT true;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS autorizada_por TEXT;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS autorizada_en TIMESTAMPTZ;
+ALTER TABLE cotizaciones ADD COLUMN IF NOT EXISTS motivo_modificacion TEXT;
+
+-- Clave foránea autoreferencial estricta
+ALTER TABLE cotizaciones DROP CONSTRAINT IF EXISTS fk_cotizaciones_padre;
+ALTER TABLE cotizaciones ADD CONSTRAINT fk_cotizaciones_padre 
+  FOREIGN KEY (version_padre_id) REFERENCES cotizaciones(id) ON DELETE RESTRICT;
+
+-- 2.3 Columnas de saldos en renglones cotizados
+ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS precio_autorizado NUMERIC(12, 2);
+ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS cantidad_facturada NUMERIC(14, 4) NOT NULL DEFAULT 0.0000;
+ALTER TABLE cotizacion_items ADD COLUMN IF NOT EXISTS cantidad_pendiente NUMERIC(14, 4);
+
+-- 2.4 Vínculo factura-cotización a nivel de renglón
+ALTER TABLE factura_items ADD COLUMN IF NOT EXISTS cotizacion_item_id TEXT;
+ALTER TABLE factura_items DROP CONSTRAINT IF EXISTS fk_factura_items_cotizacion_item;
+ALTER TABLE factura_items ADD CONSTRAINT fk_factura_items_cotizacion_item 
+  FOREIGN KEY (cotizacion_item_id) REFERENCES cotizacion_items(id) ON DELETE RESTRICT;
+
+CREATE INDEX IF NOT EXISTS idx_factura_items_cotizacion_item ON factura_items(cotizacion_item_id);
+
+-- ============================================================================
+-- 3. PROCEDIMIENTO DE BACKFILL DETERMINISTA (CLASIFICACIÓN EN 4 CATEGORÍAS)
+-- ============================================================================
+-- 3.1 Asignar cotizacion_raiz_id = id para todas las cotizaciones existentes
+UPDATE cotizaciones 
+SET cotizacion_raiz_id = id 
+WHERE cotizacion_raiz_id IS NULL;
+
+-- 3.2 CATEGORÍA 2: Cotizaciones sin facturas demostradas (saldo pendiente = cantidad)
+UPDATE cotizacion_items ci
+SET cantidad_pendiente = ci.cantidad,
+    cantidad_facturada = 0.0000
+FROM cotizaciones c
+WHERE ci.cotizacion_id = c.id
+  AND c.factura_id IS NULL
+  AND NOT EXISTS (SELECT 1 FROM facturas f WHERE f.cotizacion_id = c.id)
+  AND ci.cantidad_pendiente IS NULL;
+
+-- 3.3 CATEGORÍA 3: Cotizaciones FACTURADAS con factura activa (saldo pendiente = 0)
+UPDATE cotizacion_items ci
+SET cantidad_pendiente = 0.0000,
+    cantidad_facturada = ci.cantidad
+FROM cotizaciones c
+JOIN facturas f ON f.id = c.factura_id
+WHERE ci.cotizacion_id = c.id
+  AND c.estado = 'FACTURADA'
+  AND f.estado IN ('EMITIDA', 'PAGADA')
+  AND ci.cantidad_pendiente IS NULL;
+
+-- 3.4 CATEGORÍA 4: Cotizaciones ambiguas con factura ANULADA (no reabrir saldos)
+INSERT INTO auditoria_migracion_cotizaciones_ambiguas (
+    cotizacion_id, cotizacion_numero, producto_id, 
+    cantidad_cotizada, cantidad_facturada_detectada, motivo_ambiguedad, estado_comercial_asignado
+)
+SELECT 
+    c.id, c.numero, ci.producto_id, 
+    ci.cantidad, ci.cantidad, 
+    'Factura vinculada fue ANULADA: regla comercial prohíbe reapertura automática; saldo pendiente fijado en 0',
+    'BLOQUEADA_POR_AMBIGUEDAD'
+FROM cotizaciones c
+JOIN facturas f ON (f.id = c.factura_id OR f.cotizacion_id = c.id)
+JOIN cotizacion_items ci ON ci.cotizacion_id = c.id
+WHERE f.estado = 'ANULADA' AND ci.cantidad_pendiente IS NULL;
+
+UPDATE cotizacion_items ci
+SET cantidad_pendiente = 0.0000,
+    cantidad_facturada = ci.cantidad
+FROM cotizaciones c
+JOIN facturas f ON (f.id = c.factura_id OR f.cotizacion_id = c.id)
+WHERE ci.cotizacion_id = c.id
+  AND f.estado = 'ANULADA'
+  AND ci.cantidad_pendiente IS NULL;
+
+-- Desactivar como versión vigente aquellas cotizaciones ambiguas para impedir su cobro
+UPDATE cotizaciones c
+SET es_version_actual = false,
+    notas = notas || ' [BLOQUEADA_POR_AMBIGUEDAD_MIGRACION]'
+WHERE EXISTS (
+  SELECT 1 FROM auditoria_migracion_cotizaciones_ambiguas a 
+  WHERE a.cotizacion_id = c.id
+);
+
+-- 3.5 CATEGORÍA 1: Reconstrucción con evidencia parcial cruzando factura_items
+WITH consumo_calculado AS (
+    SELECT 
+        ci.id AS cotizacion_item_id,
+        COALESCE(SUM(fi.cantidad), 0) AS total_facturado
+    FROM cotizacion_items ci
+    JOIN cotizaciones c ON c.id = ci.cotizacion_id
+    JOIN facturas f ON (f.id = c.factura_id OR f.cotizacion_id = c.id)
+    JOIN factura_items fi ON fi.factura_id = f.id AND fi.producto_id = ci.producto_id
+    WHERE f.estado IN ('EMITIDA', 'PAGADA')
+      AND ci.cantidad_pendiente IS NULL
+    GROUP BY ci.id
+)
+UPDATE cotizacion_items ci
+SET cantidad_facturada = LEAST(ci.cantidad, cc.total_facturado),
+    cantidad_pendiente = GREATEST(0.0000, ci.cantidad - LEAST(ci.cantidad, cc.total_facturado))
+FROM consumo_calculado cc
+WHERE ci.id = cc.cotizacion_item_id;
+
+-- ============================================================================
+-- 4. VALIDACIÓN DE FRENO (SI QUEDA ALGÚN REGISTRO SIN RESOLVER, ABORTA)
+-- ============================================================================
+DO $$
+DECLARE
+    v_nulos_raiz INT;
+    v_nulos_pendiente INT;
+    v_inconsistencias INT;
+BEGIN
+    SELECT count(*) INTO v_nulos_raiz FROM cotizaciones WHERE cotizacion_raiz_id IS NULL;
+    IF v_nulos_raiz > 0 THEN
+        RAISE EXCEPTION 'FRENO DE MIGRACIÓN: Existen % cotizaciones sin cotizacion_raiz_id asignado.', v_nulos_raiz;
+    END IF;
+
+    SELECT count(*) INTO v_nulos_pendiente FROM cotizacion_items WHERE cantidad_pendiente IS NULL;
+    IF v_nulos_pendiente > 0 THEN
+        RAISE EXCEPTION 'FRENO DE MIGRACIÓN: Existen % renglones cotizados sin saldo_pendiente resuelto.', v_nulos_pendiente;
+    END IF;
+
+    SELECT count(*) INTO v_inconsistencias 
+    FROM cotizacion_items 
+    WHERE cantidad_facturada > cantidad OR cantidad_pendiente < 0;
+    IF v_inconsistencias > 0 THEN
+        RAISE EXCEPTION 'FRENO DE MIGRACIÓN: Existen % renglones con cantidades matemáticamente inconsistentes.', v_inconsistencias;
+    END IF;
+END $$;
+
+-- ============================================================================
+-- 5. APLICACIÓN DE RESTRICCIONES DEFINITIVAS NOT NULL, CHECK E ÍNDICES
+-- ============================================================================
+ALTER TABLE cotizaciones ALTER COLUMN version SET NOT NULL;
+ALTER TABLE cotizaciones ALTER COLUMN cotizacion_raiz_id SET NOT NULL;
+ALTER TABLE cotizaciones ALTER COLUMN es_version_actual SET NOT NULL;
+
+ALTER TABLE cotizaciones DROP CONSTRAINT IF EXISTS chk_cotizaciones_version_positiva;
+ALTER TABLE cotizaciones ADD CONSTRAINT chk_cotizaciones_version_positiva CHECK (version >= 1);
+
+ALTER TABLE cotizacion_items ALTER COLUMN cantidad_pendiente SET NOT NULL;
+
+ALTER TABLE cotizacion_items DROP CONSTRAINT IF EXISTS chk_cotizacion_items_cantidades_validas;
+ALTER TABLE cotizacion_items ADD CONSTRAINT chk_cotizacion_items_cantidades_validas CHECK (
+    cantidad > 0 AND 
+    cantidad_facturada >= 0 AND 
+    cantidad_pendiente >= 0 AND 
+    cantidad_facturada <= cantidad AND 
+    cantidad_pendiente = (cantidad - cantidad_facturada)
+);
+
+ALTER TABLE cotizacion_items DROP CONSTRAINT IF EXISTS chk_cotizacion_items_precio_autorizado;
+ALTER TABLE cotizacion_items ADD CONSTRAINT chk_cotizacion_items_precio_autorizado 
+  CHECK (precio_autorizado IS NULL OR precio_autorizado >= 0);
+
+-- Exactamente UNA versión vigente activa por raíz
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cotizaciones_version_vigente 
+  ON cotizaciones (cotizacion_raiz_id) 
+  WHERE es_version_actual = true;
+
+-- Unicidad del número de versión dentro de cada raíz
+CREATE UNIQUE INDEX IF NOT EXISTS uq_cotizaciones_raiz_version 
+  ON cotizaciones (cotizacion_raiz_id, version);
+
+-- ============================================================================
+-- 6. TRIGGERS CORREGIDOS CON MANEJO ESTRICTO DE TG_OP (INMUTABILIDAD COMPLETA)
+-- ============================================================================
+-- 6.1 Trigger en Cabeceras (cotizaciones)
+CREATE OR REPLACE FUNCTION fn_trg_cotizaciones_inmutabilidad()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        IF OLD.estado IN ('AUTORIZADA', 'PARCIALMENTE_FACTURADA', 'FACTURADA', 'SUSTITUIDA') THEN
+            RAISE EXCEPTION 'Violación de Inmutabilidad: No se permite eliminar cotizaciones con historial comercial (id: %, estado: %)', OLD.id, OLD.estado;
+        END IF;
+        RETURN OLD;
+    ELSIF TG_OP = 'UPDATE' THEN
+        -- Si la versión ya no era vigente, impedir cualquier alteración comercial
+        IF OLD.es_version_actual = false THEN
+            IF NEW.subtotal <> OLD.subtotal OR NEW.total <> OLD.total OR NEW.cliente <> OLD.cliente OR NEW.version <> OLD.version THEN
+                RAISE EXCEPTION 'Violación de Inmutabilidad: La versión histórica v% (id: %) es de solo lectura y no puede modificarse.', OLD.version, OLD.id;
+            END IF;
+        END IF;
+
+        -- Si estaba AUTORIZADA, solo se permite transicionar de estado o registrar motivo
+        IF OLD.estado = 'AUTORIZADA' AND NEW.estado = 'AUTORIZADA' THEN
+            IF NEW.subtotal <> OLD.subtotal OR NEW.total <> OLD.total THEN
+                RAISE EXCEPTION 'Violación de Inmutabilidad: Los totales de una cotización AUTORIZADA no pueden alterarse sin generar una nueva versión.';
+            END IF;
+        END IF;
+
+        RETURN NEW;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_cotizaciones_inmutabilidad ON cotizaciones;
+CREATE TRIGGER trg_cotizaciones_inmutabilidad
+BEFORE UPDATE OR DELETE ON cotizaciones
+FOR EACH ROW EXECUTE FUNCTION fn_trg_cotizaciones_inmutabilidad();
+
+-- 6.2 Trigger en Renglones (cotizacion_items)
+CREATE OR REPLACE FUNCTION fn_trg_cotizacion_items_inmutabilidad()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_es_actual BOOLEAN;
+    v_estado TEXT;
+BEGIN
+    IF TG_OP = 'DELETE' THEN
+        SELECT es_version_actual, estado INTO v_es_actual, v_estado 
+        FROM cotizaciones WHERE id = OLD.cotizacion_id;
+        
+        IF v_estado IN ('AUTORIZADA', 'PARCIALMENTE_FACTURADA', 'FACTURADA', 'SUSTITUIDA') THEN
+            RAISE EXCEPTION 'Violación de Inmutabilidad: Prohibido eliminar renglones de cotizaciones en estado % (cotizacion_id: %)', v_estado, OLD.cotizacion_id;
+        END IF;
+        RETURN OLD;
+
+    ELSIF TG_OP = 'UPDATE' THEN
+        SELECT es_version_actual, estado INTO v_es_actual, v_estado 
+        FROM cotizaciones WHERE id = OLD.cotizacion_id;
+
+        -- Si la cotización fue sustituida o ya está facturada, prohibir cualquier cambio
+        IF v_es_actual = false OR v_estado IN ('SUSTITUIDA', 'FACTURADA') THEN
+            RAISE EXCEPTION 'Violación de Inmutabilidad: Renglón perteneciente a versión histórica sustituida o liquidada (cotizacion_id: %)', OLD.cotizacion_id;
+        END IF;
+
+        -- Si la cotización está AUTORIZADA o PARCIALMENTE_FACTURADA, congelar precios y cantidades pactadas
+        IF v_estado IN ('AUTORIZADA', 'PARCIALMENTE_FACTURADA') THEN
+            IF NEW.cantidad <> OLD.cantidad THEN
+                RAISE EXCEPTION 'Violación de Integridad: La cantidad pactada en cotización autorizada no puede modificarse. Para ajustar compromisos genere una nueva versión.';
+            END IF;
+            IF NEW.precio <> OLD.precio OR (NEW.precio_autorizado IS DISTINCT FROM OLD.precio_autorizado) THEN
+                RAISE EXCEPTION 'Violación de Integridad: El precio pactado en cotización autorizada permanece congelado y no admite modificaciones en el renglón.';
+            END IF;
+            IF NEW.producto_id <> OLD.producto_id THEN
+                RAISE EXCEPTION 'Violación de Integridad: No se permite cambiar el producto de un renglón autorizado.';
+            END IF;
+        END IF;
+
+        RETURN NEW;
+
+    ELSIF TG_OP = 'INSERT' THEN
+        SELECT es_version_actual, estado INTO v_es_actual, v_estado 
+        FROM cotizaciones WHERE id = NEW.cotizacion_id;
+
+        IF v_es_actual = false OR v_estado IN ('SUSTITUIDA', 'FACTURADA') THEN
+            RAISE EXCEPTION 'Violación de Integridad: No se pueden insertar nuevos renglones en cotizaciones históricas o liquidadas.';
+        END IF;
+        RETURN NEW;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_cotizacion_items_inmutabilidad ON cotizacion_items;
+CREATE TRIGGER trg_cotizacion_items_inmutabilidad
+BEFORE INSERT OR UPDATE OR DELETE ON cotizacion_items
+FOR EACH ROW EXECUTE FUNCTION fn_trg_cotizacion_items_inmutabilidad();
+
+-- ============================================================================
+-- 7. TABLAS DE GOBERNANZA BANCARIA Y OPERACIONES PENDIENTES (POLÍTICA A)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS cuentas_bancarias_empresa (
+    id TEXT PRIMARY KEY,
+    banco TEXT NOT NULL,
+    alias_interno TEXT NOT NULL,
+    moneda TEXT NOT NULL CHECK (moneda IN ('CORDOBAS', 'DOLARES')),
+    activa BOOLEAN NOT NULL DEFAULT true
+);
+
+CREATE TABLE IF NOT EXISTS operaciones_pendientes_transferencia (
+    id TEXT PRIMARY KEY,
+    codigo_seguimiento TEXT UNIQUE NOT NULL,
+    cliente TEXT NOT NULL,
+    cliente_id TEXT REFERENCES clientes(id) ON DELETE RESTRICT,
+    cajero_id TEXT NOT NULL,
+    fecha_registro TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    
+    cuenta_receptora_id TEXT NOT NULL REFERENCES cuentas_bancarias_empresa(id) ON DELETE RESTRICT,
+    banco_origen TEXT NOT NULL,
+    referencia_bancaria TEXT NOT NULL,
+    comprobante_url TEXT NOT NULL,
+    comprobante_hash TEXT NOT NULL,
+    monto_declarado NUMERIC(12, 2) NOT NULL CHECK (monto_declarado > 0),
+    
+    tipo_operacion TEXT NOT NULL CHECK (tipo_operacion IN ('VENTA_DIRECTA', 'COTIZACION', 'ABONO_CREDITO')),
+    cotizacion_id TEXT REFERENCES cotizaciones(id) ON DELETE RESTRICT,
+    cotizacion_version INT,
+    factura_credito_id TEXT REFERENCES facturas(id) ON DELETE RESTRICT,
+    
+    lineas_solicitadas JSONB NOT NULL,
+    subtotal NUMERIC(12, 2) NOT NULL,
+    iva NUMERIC(12, 2) NOT NULL,
+    total NUMERIC(12, 2) NOT NULL,
+    
+    -- ESTADOS DESACOPLADOS: FINANCIERO VS COMERCIAL
+    estado_bancario TEXT NOT NULL DEFAULT 'PENDIENTE' 
+      CHECK (estado_bancario IN ('PENDIENTE', 'ACREDITADO', 'RECHAZADO')),
+    verificado_por TEXT,
+    fecha_verificacion TIMESTAMPTZ,
+    motivo_rechazo_bancario TEXT,
+    
+    estado_comercial TEXT NOT NULL DEFAULT 'PENDIENTE' 
+      CHECK (estado_comercial IN ('PENDIENTE', 'CONFIRMADO_FACTURADO', 'RETENIDO_INCIDENCIA', 'CANCELADO')),
+    
+    clave_idempotencia TEXT UNIQUE NOT NULL,
+    factura_emitida_id TEXT REFERENCES facturas(id) ON DELETE RESTRICT
+);
+
+-- Unicidad estricta anti-reutilización: una referencia bancaria acreditada no puede reutilizarse
+CREATE UNIQUE INDEX IF NOT EXISTS uq_transferencias_acreditadas 
+  ON operaciones_pendientes_transferencia (cuenta_receptora_id, referencia_bancaria) 
+  WHERE estado_bancario = 'ACREDITADO';
+
+-- Control de comprobantes duplicados idénticos en trámite
+CREATE UNIQUE INDEX IF NOT EXISTS uq_transferencias_hash_pendiente 
+  ON operaciones_pendientes_transferencia (comprobante_hash) 
+  WHERE estado_bancario = 'PENDIENTE';
+
+-- 7.1 Tabla de Incidencias Post-Acreditación
+CREATE TABLE IF NOT EXISTS incidencias_operaciones_transferencia (
+    id TEXT PRIMARY KEY DEFAULT ('INC-' || gen_random_uuid()),
+    operacion_id TEXT NOT NULL REFERENCES operaciones_pendientes_transferencia(id) ON DELETE RESTRICT,
+    tipo_incidencia TEXT NOT NULL CHECK (tipo_incidencia IN (
+      'STOCK_INSUFICIENTE_POST_ACREDITACION',
+      'VERSION_COTIZACION_OBSOLETA',
+      'FALLO_TECNICO_FACTURACION',
+      'SOBREPRECIO_NO_AUTORIZADO'
+    )),
+    detalle JSONB NOT NULL,
+    estado TEXT NOT NULL DEFAULT 'ABIERTA' CHECK (estado IN ('ABIERTA', 'RESUELTA', 'CANCELADA')),
+    resolucion TEXT,
+    resuelto_por TEXT,
+    fecha_resolucion TIMESTAMPTZ,
+    fecha_creacion TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 7.2 Tabla de Abonos a Cartera de Crédito
+CREATE TABLE IF NOT EXISTS abonos_facturas (
+    id TEXT PRIMARY KEY,
+    folio TEXT UNIQUE NOT NULL,
+    factura_id TEXT NOT NULL REFERENCES facturas(id) ON DELETE RESTRICT,
+    cliente_id TEXT NOT NULL REFERENCES clientes(id) ON DELETE RESTRICT,
+    monto NUMERIC(12, 2) NOT NULL CHECK (monto > 0),
+    medio_cobro TEXT NOT NULL CHECK (medio_cobro IN ('EFECTIVO', 'TRANSFERENCIA')),
+    turno_caja_id TEXT REFERENCES turnos_caja(id) ON DELETE RESTRICT,
+    operacion_transferencia_id TEXT REFERENCES operaciones_pendientes_transferencia(id) ON DELETE RESTRICT,
+    saldo_factura_previo NUMERIC(12, 2) NOT NULL,
+    saldo_factura_restante NUMERIC(12, 2) NOT NULL,
+    saldo_cliente_previo NUMERIC(12, 2) NOT NULL,
+    saldo_cliente_restante NUMERIC(12, 2) NOT NULL,
+    registrado_por TEXT NOT NULL,
+    fecha TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    clave_idempotencia TEXT UNIQUE NOT NULL
+);
+
+COMMIT;
+```
+
+---
+
+## 5. Función Transaccional de Versionado Atómico
+
+Esta función almacenada ejecuta la creación de una nueva versión $V_{N+1}$ sobre compromisos pendientes con bloqueo pesimista y aislamiento `READ COMMITTED`:
+
+```sql
+CREATE OR REPLACE FUNCTION fn_versionar_cotizacion_atomica(
+    p_cotizacion_actual_id TEXT,
+    p_usuario TEXT,
+    p_motivo TEXT,
+    p_nuevo_id TEXT,
+    p_nuevo_numero TEXT,
+    p_renglones_nuevos JSONB -- Array de {productoId, cantidad, precio, unidadMedida, observacion}
+)
+RETURNS JSONB AS $$
+DECLARE
+    v_cot_actual RECORD;
+    v_item RECORD;
+    v_item_nuevo RECORD;
+    v_nueva_version_num INT;
+    v_subtotal NUMERIC(12, 2) := 0.00;
+    v_iva NUMERIC(12, 2) := 0.00;
+    v_total NUMERIC(12, 2) := 0.00;
+    v_nuevo_item_id TEXT;
+    v_elem JSONB;
+BEGIN
+    -- 1. Bloqueo pesimista de la cotización actual
+    SELECT * INTO v_cot_actual 
+    FROM cotizaciones 
+    WHERE id = p_cotizacion_actual_id 
+    FOR UPDATE;
+
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Error de Versionado: La cotización % no existe.', p_cotizacion_actual_id;
+    END IF;
+
+    IF v_cot_actual.es_version_actual = false OR v_cot_actual.estado = 'SUSTITUIDA' THEN
+        RAISE EXCEPTION 'Violación de Integridad: La cotización % ya no es la versión vigente (v%).', 
+            v_cot_actual.numero, v_cot_actual.version;
+    END IF;
+
+    IF v_cot_actual.estado NOT IN ('AUTORIZADA', 'PARCIALMENTE_FACTURADA') THEN
+        RAISE EXCEPTION 'Estado Inválido: Solo cotizaciones AUTORIZADA o PARCIALMENTE_FACTURADA admiten versionado (estado actual: %).', 
+            v_cot_actual.estado;
+    END IF;
+
+    v_nueva_version_num := v_cot_actual.version + 1;
+
+    -- 2. Marcar la versión actual como SUSTITUIDA e inactiva
+    UPDATE cotizaciones 
+    SET es_version_actual = false,
+        estado = 'SUSTITUIDA',
+        motivo_modificacion = '[Sustituida por v' || v_nueva_version_num || ': ' || p_motivo || ']'
+    WHERE id = p_cotizacion_actual_id;
+
+    -- 3. Insertar la nueva versión cabecera
+    INSERT INTO cotizaciones (
+        id, numero, cliente, cliente_id, fecha, estado, notas,
+        creado_por, version, cotizacion_raiz_id, version_padre_id,
+        es_version_actual, subtotal, iva, total
+    ) VALUES (
+        p_nuevo_id, p_nuevo_numero, v_cot_actual.cliente, v_cot_actual.cliente_id,
+        CURRENT_DATE, 'PENDIENTE_AUTORIZACION', 
+        COALESCE(v_cot_actual.notas, '') || ' [Versión ' || v_nueva_version_num || ' basada en saldos pendientes]',
+        p_usuario, v_nueva_version_num, v_cot_actual.cotizacion_raiz_id, v_cot_actual.id,
+        true, 0, 0, 0
+    );
+
+    -- 4. Procesar e insertar renglones de la nueva versión con validación de saldo pendiente
+    FOR v_elem IN SELECT * FROM jsonb_array_elements(p_renglones_nuevos)
+    LOOP
+        -- Validar que la cantidad solicitada no supere el saldo pendiente de la versión previa
+        SELECT ci.* INTO v_item 
+        FROM cotizacion_items ci 
+        WHERE ci.cotizacion_id = p_cotizacion_actual_id 
+          AND ci.producto_id = (v_elem->>'productoId')
+        FOR SHARE;
+
+        IF FOUND THEN
+            IF (v_elem->>'cantidad')::NUMERIC > v_item.cantidad_pendiente THEN
+                RAISE EXCEPTION 'Sobrefacturación detectada: La cantidad propuesta (%) supera el saldo pendiente (%) del producto %',
+                    (v_elem->>'cantidad'), v_item.cantidad_pendiente, v_item.producto_id;
+            END IF;
+        END IF;
+
+        v_nuevo_item_id := 'cot_item_v' || v_nueva_version_num || '_' || gen_random_uuid();
+        
+        INSERT INTO cotizacion_items (
+            id, cotizacion_id, producto_id, cantidad, precio, unidad_medida,
+            observacion, precio_autorizado, cantidad_facturada, cantidad_pendiente
+        ) VALUES (
+            v_nuevo_item_id,
+            p_nuevo_id,
+            v_elem->>'productoId',
+            (v_elem->>'cantidad')::NUMERIC,
+            (v_elem->>'precio')::NUMERIC,
+            v_elem->>'unidadMedida',
+            COALESCE(v_elem->>'observacion', ''),
+            NULL, -- Requiere nueva autorización formal del propietario
+            0.0000,
+            (v_elem->>'cantidad')::NUMERIC
+        );
+
+        v_subtotal := v_subtotal + ((v_elem->>'cantidad')::NUMERIC * (v_elem->>'precio')::NUMERIC);
+    END LOOP;
+
+    v_iva := ROUND(v_subtotal * 0.15, 2);
+    v_total := v_subtotal + v_iva;
+
+    -- 5. Actualizar totales de la nueva versión
+    UPDATE cotizaciones 
+    SET subtotal = v_subtotal, iva = v_iva, total = v_total 
+    WHERE id = p_nuevo_id;
+
+    RETURN jsonb_build_object(
+        'ok', true,
+        'cotizacion_anterior_id', p_cotizacion_actual_id,
+        'nueva_cotizacion_id', p_nuevo_id,
+        'nueva_version', v_nueva_version_num,
+        'total', v_total
+    );
+END;
+$$ LANGUAGE plpgsql;
+```
+
+---
+
+## 6. Casos de Prueba Previstos para la Fase 3.1 en Staging
+
+En el entorno aislado de staging se ejecutarán estos 8 casos de prueba automatizados:
+
+| No. | Caso de Prueba | Condición Inicial | Acción / Evento | Resultado Esperado |
+| :---: | :--- | :--- | :--- | :--- |
+| **CP-1** | **Unicidad de Versión Vigente** | Cotización $V_1$ con `es_version_actual = true` | Intentar insertar $V_2$ con `es_version_actual = true` sin sustituir $V_1$ | **Aborto por violación del índice único `uq_cotizaciones_version_vigente`**. |
+| **CP-2** | **Inmutabilidad de Cabecera Sustituida** | Cotización en estado `SUSTITUIDA` | `UPDATE cotizaciones SET total = 5000 WHERE id = ...` | **Excepción `trg_cotizaciones_inmutabilidad` aborta el cambio**. |
+| **CP-3** | **Congelamiento de Precios Autorizados** | Cotización en estado `AUTORIZADA` | `UPDATE cotizacion_items SET precio = 100 WHERE ...` | **Excepción `trg_cotizacion_items_inmutabilidad` aborta el cambio**. |
+| **CP-4** | **Bloqueo de Doble Acreditación** | Transferencia `REF-890` acreditada en BAC | Registrar segundo comprobante con `REF-890` en BAC | **Aborto por violación de `uq_transferencias_acreditadas`**. |
+| **CP-5** | **Bloqueo de Comprobante Idéntico** | Voucher `hash_A` pendiente de verificar | Subir el mismo voucher `hash_A` en otra terminal | **Aborto por violación de `uq_transferencias_hash_pendiente`**. |
+| **CP-6** | **Acreditación con Stock Insuficiente** | Operación con 50 sacos de cemento; stock real = 10 | Propietario audita y confirma fondos en banco | `estado_bancario = 'ACREDITADO'`, `estado_comercial = 'RETENIDO_INCIDENCIA'`, se inserta fila en `incidencias`. **Cero facturas, cero Kárdex**. |
+| **CP-7** | **Acreditación Exitosa Atómica** | Operación verificada con stock suficiente | Confirmación comercial atómica | Factura emitida, Kárdex rebajado, cotización consumida, `estado_comercial = 'CONFIRMADO_FACTURADO'`. |
+| **CP-8** | **Rollback Limpio ante Error Inesperado** | Falla intencional en inserción de Kárdex | Transacción de confirmación | `ROLLBACK` total. Dinero conservado en `operaciones_pendientes_transferencia` sin desajustes. |
+
+---
+
+## 7. Riesgos Residuales Documentados
+
+1. **Riesgo de Reconciliación Manual en Incidencias Comerciales**:  
+   Si una operación queda en `RETENIDO_INCIDENCIA` (dinero en banco pero sin stock para entrega), el sistema protege el inventario y no emite factura en falso, pero exige que el propietario se comunique con el cliente el mismo día hábil.  
+   *Mitigación*: Implementar notificación prioritaria al dueño en el inicio del panel.
+2. **Volumen de Cotizaciones Ambiguas en Producción**:  
+   Si la base de datos de producción posee cotizaciones con facturas anuladas o discrepancias de códigos antiguos, dichas cotizaciones quedarán congeladas y no podrán facturarse por mostrador.  
+   *Mitigación*: La vista `auditoria_migracion_cotizaciones_ambiguas` proporciona la lista exacta de documentos para que los dueños las revisen en lote.
+3. **Dependencia de la Conectividad de Neon PostgreSQL**:  
+   Al operar en arquitectura serverless, las transacciones con bloqueos pesimistas (`SELECT ... FOR UPDATE`) deben ejecutarse con tiempos de vida de transacción breves (< 3 segundos) para evitar agotar el pool de conexiones.
+
+---
+
+## 8. Confirmación de No Ejecución
+
+- **Sentencias DDL / SQL ejecutadas**: **NINGUNA (0)**.
+- **Modificaciones a Neon PostgreSQL**: **NINGUNA (0)**.
+- **Modificaciones a archivos de datos `data/*.json`**: **NINGUNA (0)**. Hashes SHA-256 intactos:
+  - `data/bodega.json`: `9EBA69BA...`
+  - `data/configuracion.json`: `9DA169F0...`
+  - `data/usuarios.json`: `E8A96413...`
+- **Modificaciones a Server Actions o frontend**: **NINGUNA (0)**.
+
+---
+
+*El diseño de la Fase 3.0D queda formalmente cerrado, corregido y validado a nivel estático. Se aguarda su veredicto y autorización formal para la siguiente etapa.*

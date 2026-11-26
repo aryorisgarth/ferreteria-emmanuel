@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ferretería Emmanuel - Brand System & SVG Assets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            navy: '#1E293B',
+                            slate: '#334155',
+                            yellow: '#F59E0B',
+                            brightYellow: '#FCD34D',
+                            lightBg: '#F8FAFC',
+                            darkBg: '#0F172A',
+                            accentBlue: '#2563EB'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .dark-glass { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(12px); }
+        .copy-toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        .copy-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-20">
+
+    <!-- Notification Toast -->
+    <div id="toast" class="copy-toast bg-brand-yellow text-slate-950 font-semibold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-3 z-50">
+        <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+        <span id="toast-message">¡Código SVG copiado al portapapeles!</span>
+    </div>
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-slate-800 bg-slate-950/80 sticky top-0 z-40 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <!-- Inline SVG Logo (Compact Mode) -->
+                <svg class="h-8 w-auto" viewBox="0 0 500 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#334155"/>
+                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#475569"/>
+                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                </svg>
+                <div class="leading-tight">
+                    <h1 class="font-bold text-lg text-white tracking-wider">FERRETERÍA <span class="text-brand-yellow">EMMANUEL</span></h1>
+                    <p class="text-xs text-slate-400">Guía de Marca & Asset Manager para Cursor AI</p>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+                <a href="#svg-library" class="hover:text-brand-yellow transition">Vectores SVG</a>
+                <a href="#mockups" class="hover:text-brand-yellow transition">Mockups Interactivos</a>
+                <a href="#palette" class="hover:text-brand-yellow transition">Paleta de Color</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-16">
+
+        <!-- Hero Intro Section -->
+        <section class="text-center max-w-3xl mx-auto space-y-4">
+            <span class="inline-block bg-brand-yellow/10 text-brand-yellow border border-brand-yellow/30 text-xs uppercase tracking-widest font-bold px-3 py-1 rounded-full">
+                Diseño Vectorial Scalable (.SVG)
+            </span>
+            <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
+                Sistema de Identidad Visual Completo
+            </h2>
+            <p class="text-slate-400 text-base sm:text-lg">
+                Vectores limpios, adaptables y listos para integrarse en tu aplicación web, dashboard móvil o facturación electrónica con Cursor AI.
+            </p>
+        </section>
+
+        <!-- SECTION 1: SVG ASSET LIBRARY -->
+        <section id="svg-library" class="space-y-6">
+            <div class="border-b border-slate-800 pb-4 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <svg class="w-5 h-5 text-brand-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        1. Biblioteca de Variaciones de Logo SVG
+                    </h3>
+                    <p class="text-sm text-slate-400">Haz clic en cualquier botón para copiar el código SVG puro y pegarlo en tus archivos HTML/React.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                <!-- Asset 1: Horizontal Full Color -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>HORIZONTAL / FULL COLOR</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">Light & Dark Bg</span>
+                        </div>
+                        <div class="bg-slate-950/70 p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-800">
+                            <!-- Horizontal SVG -->
+                            <svg id="svg-horizontal" class="w-full max-w-[280px] h-auto" viewBox="0 0 1100 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                </g>
+                                <text x="460" y="200" fill="#94A3B8" font-family="'Inter', sans-serif" font-weight="700" font-size="78" letter-spacing="4">FERRETERÍA</text>
+                                <text x="460" y="310" fill="#F59E0B" font-family="'Inter', sans-serif" font-weight="900" font-size="115" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-horizontal', 'Logo Horizontal Full-Color')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar SVG Horizontal
+                    </button>
+                </div>
+
+                <!-- Asset 2: Vertical Stacked -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>VERTICAL STACKED</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">Login / Splash</span>
+                        </div>
+                        <div class="bg-slate-950/70 p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-800">
+                            <!-- Vertical SVG -->
+                            <svg id="svg-vertical" class="h-32 w-auto" viewBox="0 0 480 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon-v" transform="translate(15, 0)">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                </g>
+                                <text x="240" y="410" text-anchor="middle" fill="#94A3B8" font-family="'Inter', sans-serif" font-weight="700" font-size="42" letter-spacing="4">FERRETERÍA</text>
+                                <text x="240" y="470" text-anchor="middle" fill="#F59E0B" font-family="'Inter', sans-serif" font-weight="900" font-size="62" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-vertical', 'Logo Vertical Stacking')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar SVG Vertical
+                    </button>
+                </div>
+
+                <!-- Asset 3: Monochromatic Light (White) -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>MONOCHROME / LIGHT</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">Dark Header</span>
+                        </div>
+                        <div class="bg-slate-950/70 p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-800">
+                            <!-- Monochrome Light SVG -->
+                            <svg id="svg-mono-light" class="w-full max-w-[280px] h-auto" viewBox="0 0 1100 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon-mono">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#CBD5E1"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#94A3B8"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#FFFFFF"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#475569"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#1E293B"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#FFFFFF"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#E2E8F0"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#FFFFFF"/>
+                                </g>
+                                <text x="460" y="200" fill="#94A3B8" font-family="'Inter', sans-serif" font-weight="700" font-size="78" letter-spacing="4">FERRETERÍA</text>
+                                <text x="460" y="310" fill="#FFFFFF" font-family="'Inter', sans-serif" font-weight="900" font-size="115" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-mono-light', 'Logo Monocromático Claro')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar SVG Monocromo
+                    </button>
+                </div>
+
+                <!-- Asset 4: App Launcher Icon / Favicon -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>APP ICON / FAVICON</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">Squircle Badge</span>
+                        </div>
+                        <div class="bg-slate-950/70 p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-800">
+                            <!-- App Icon SVG -->
+                            <svg id="svg-app-icon" class="w-24 h-24" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="500" height="500" rx="110" fill="#1E293B"/>
+                                <g transform="translate(25, 45)">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#0F172A"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#1E293B"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-app-icon', 'App Launcher / Favicon')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar App Icon SVG
+                    </button>
+                </div>
+
+                <!-- Asset 5: Standalone Isotype -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>ISOTIPO / ICON ONLY</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">Clean Icon</span>
+                        </div>
+                        <div class="bg-slate-950/70 p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-800">
+                            <!-- Isotype SVG -->
+                            <svg id="svg-isotype" class="h-28 w-auto" viewBox="0 0 450 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                                <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                                <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-isotype', 'Isotipo Icono Solo')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar Isotipo SVG
+                    </button>
+                </div>
+
+                <!-- Asset 6: Inverted Document Version -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-600 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between text-xs text-slate-400 font-mono">
+                            <span>PRINT / INVOICE MODE</span>
+                            <span class="bg-slate-700 px-2 py-0.5 rounded text-slate-300">White Background</span>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl flex items-center justify-center min-h-[160px] border border-slate-300">
+                            <!-- Inverted Document SVG -->
+                            <svg id="svg-print-mode" class="w-full max-w-[280px] h-auto" viewBox="0 0 1100 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon-print">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#334155"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#475569"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#D97706"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#0F172A"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#F8FAFC"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#D97706"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#D97706"/>
+                                </g>
+                                <text x="460" y="200" fill="#475569" font-family="'Inter', sans-serif" font-weight="700" font-size="78" letter-spacing="4">FERRETERÍA</text>
+                                <text x="460" y="310" fill="#D97706" font-family="'Inter', sans-serif" font-weight="900" font-size="115" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+                        </div>
+                    </div>
+                    <button onclick="copySvgCode('svg-print-mode', 'Logo Modo Impresión')" class="mt-6 w-full bg-slate-700 hover:bg-brand-yellow hover:text-slate-950 font-semibold py-2.5 px-4 rounded-xl text-sm transition duration-200 flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                        Copiar SVG para Facturas
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- SECTION 2: INTERACTIVE MOCKUPS -->
+        <section id="mockups" class="space-y-8">
+            <div class="border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    2. Implementación en Vivo (Mockups de Aplicación)
+                </h3>
+                <p class="text-sm text-slate-400">Demostración en vivo de cómo se comporta el logo en cada contexto clave de la aplicación.</p>
+            </div>
+
+            <!-- Tab Navigation for Mockups -->
+            <div class="flex flex-wrap gap-2 border-b border-slate-800 pb-3">
+                <button onclick="switchTab('screen-login')" id="tab-screen-login" class="px-4 py-2 rounded-xl text-sm font-semibold transition bg-brand-yellow text-slate-950 shadow-md">
+                    1. Pantalla de Login
+                </button>
+                <button onclick="switchTab('screen-dashboard')" id="tab-screen-dashboard" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-400 hover:text-white transition">
+                    2. Navbar Dashboard
+                </button>
+                <button onclick="switchTab('screen-invoice')" id="tab-screen-invoice" class="px-4 py-2 rounded-xl text-sm font-semibold text-slate-400 hover:text-white transition">
+                    3. Cotizaciones & Facturas
+                </button>
+            </div>
+
+            <!-- Mockup Window Frame Container -->
+            <div class="bg-slate-950 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+                
+                <!-- Window Controls Top Bar -->
+                <div class="bg-slate-900 border-b border-slate-800 px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span class="ml-2 text-xs font-mono text-slate-500">app.ferreteriaemmanuel.com</span>
+                    </div>
+                    <div class="text-xs text-slate-500 font-mono">Vista Previa Responsiva</div>
+                </div>
+
+                <!-- MOCKUP 1: LOGIN SCREEN -->
+                <div id="screen-login" class="p-6 sm:p-12 min-h-[550px] flex items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
+                    <div class="absolute -top-32 -left-32 w-96 h-96 bg-brand-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div class="w-full max-w-md bg-slate-900/90 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6">
+                        <!-- Login Header Logo -->
+                        <div class="text-center space-y-3">
+                            <div class="inline-block">
+                                <svg class="h-28 w-auto mx-auto" viewBox="0 0 480 440" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g id="logo-icon-login">
+                                        <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                        <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                        <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                        <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                                        <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                                        <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                        <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                        <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    </g>
+                                    <text x="240" y="390" text-anchor="middle" fill="#94A3B8" font-family="'Inter', sans-serif" font-weight="700" font-size="34" letter-spacing="4">FERRETERÍA</text>
+                                    <text x="240" y="440" text-anchor="middle" fill="#F59E0B" font-family="'Inter', sans-serif" font-weight="900" font-size="48" letter-spacing="2">EMMANUEL</text>
+                                </svg>
+                            </div>
+                            <p class="text-xs text-slate-400">Sistema de Gestión de Inventario & POS</p>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form onsubmit="event.preventDefault();" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Usuario o Correo</label>
+                                <input type="text" value="admin@emmanuel.com" class="w-full bg-slate-950 border border-slate-700 focus:border-brand-yellow rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition" readonly>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Contraseña</label>
+                                <input type="password" value="••••••••••••" class="w-full bg-slate-950 border border-slate-700 focus:border-brand-yellow rounded-xl px-4 py-3 text-sm text-slate-100 outline-none transition" readonly>
+                            </div>
+                            <button type="button" class="w-full bg-brand-yellow hover:bg-yellow-400 text-slate-950 font-bold py-3 px-4 rounded-xl shadow-lg transition duration-200">
+                                Iniciar Sesión en el Dashboard
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- MOCKUP 2: DASHBOARD NAVBAR -->
+                <div id="screen-dashboard" class="hidden min-h-[550px] bg-slate-900 flex flex-col">
+                    <!-- Dashboard Header -->
+                    <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <!-- Horizontal Logo for Header -->
+                            <svg class="h-9 w-auto" viewBox="0 0 1100 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon-dash">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#475569"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#64748B"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#F59E0B"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#1E293B"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#0F172A"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#FCD34D"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                </g>
+                                <text x="460" y="200" fill="#94A3B8" font-family="'Inter', sans-serif" font-weight="700" font-size="78" letter-spacing="4">FERRETERÍA</text>
+                                <text x="460" y="310" fill="#F59E0B" font-family="'Inter', sans-serif" font-weight="900" font-size="115" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+
+                            <nav class="hidden md:flex gap-4 text-xs font-semibold text-slate-400">
+                                <a href="#" class="bg-slate-800 text-white px-3 py-1.5 rounded-lg">Ventas</a>
+                                <a href="#" class="hover:text-white px-3 py-1.5 transition">Inventario</a>
+                                <a href="#" class="hover:text-white px-3 py-1.5 transition">Clientes</a>
+                                <a href="#" class="hover:text-white px-3 py-1.5 transition">Cotizaciones</a>
+                            </nav>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-brand-yellow/20 text-brand-yellow font-bold text-xs flex items-center justify-center border border-brand-yellow/30">
+                                FE
+                            </div>
+                            <span class="text-xs text-slate-300 font-medium hidden sm:inline">Cajero #01</span>
+                        </div>
+                    </header>
+
+                    <!-- Dashboard Body Mock -->
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 flex-1">
+                        <div class="bg-slate-800/40 border border-slate-800 p-5 rounded-2xl space-y-2">
+                            <p class="text-xs text-slate-400">Ventas del Día</p>
+                            <p class="text-2xl font-black text-white">$1,450.80</p>
+                            <span class="text-xs text-emerald-400 font-semibold">+12% vs ayer</span>
+                        </div>
+                        <div class="bg-slate-800/40 border border-slate-800 p-5 rounded-2xl space-y-2">
+                            <p class="text-xs text-slate-400">Cotizaciones Pendientes</p>
+                            <p class="text-2xl font-black text-brand-yellow">14</p>
+                            <span class="text-xs text-slate-400">Listas para facturación</span>
+                        </div>
+                        <div class="bg-slate-800/40 border border-slate-800 p-5 rounded-2xl space-y-2">
+                            <p class="text-xs text-slate-400">Stock Crítico</p>
+                            <p class="text-2xl font-black text-rose-400">3 Productos</p>
+                            <span class="text-xs text-rose-400 font-semibold">Cemento y Taladro</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MOCKUP 3: DIGITAL INVOICE / QUOTATION -->
+                <div id="screen-invoice" class="hidden min-h-[550px] bg-slate-900 p-4 sm:p-8 flex justify-center">
+                    <div class="w-full max-w-2xl bg-white text-slate-900 rounded-xl shadow-2xl p-6 sm:p-10 text-xs sm:text-sm space-y-8">
+                        
+                        <!-- Invoice Header -->
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-200 pb-6 gap-4">
+                            <!-- Inverted Print Logo -->
+                            <svg class="h-12 w-auto" viewBox="0 0 1100 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="logo-icon-inv">
+                                    <path d="M 60 170 L 60 350 L 250 350 L 250 310 L 100 310 L 100 190 Z" fill="#334155"/>
+                                    <path d="M 60 170 L 250 30 L 275 50 L 95 195 Z" fill="#475569"/>
+                                    <path d="M 235 45 L 435 200 L 395 230 L 235 100 L 135 175 L 110 155 Z" fill="#D97706"/>
+                                    <path d="M 240 105 L 400 225 L 400 350 L 240 350 Z" fill="#0F172A"/>
+                                    <path d="M 240 160 L 350 160 L 350 310 L 240 310 Z" fill="#FFFFFF"/>
+                                    <rect x="255" y="180" width="80" height="22" rx="4" fill="#D97706"/>
+                                    <rect x="255" y="215" width="80" height="22" rx="4" fill="#F59E0B"/>
+                                    <rect x="255" y="250" width="80" height="22" rx="4" fill="#D97706"/>
+                                </g>
+                                <text x="460" y="200" fill="#334155" font-family="'Inter', sans-serif" font-weight="700" font-size="78" letter-spacing="4">FERRETERÍA</text>
+                                <text x="460" y="310" fill="#D97706" font-family="'Inter', sans-serif" font-weight="900" font-size="115" letter-spacing="2">EMMANUEL</text>
+                            </svg>
+
+                            <div class="text-right">
+                                <h4 class="text-xl font-black text-slate-800 tracking-tight">COTIZACIÓN / FACTURA</h4>
+                                <p class="text-slate-500 font-mono">No. COT-00294</p>
+                                <p class="text-slate-400 text-xs">Fecha: 02 de Noviembre, 2026</p>
+                            </div>
+                        </div>
+
+                        <!-- Info Grid -->
+                        <div class="grid grid-cols-2 gap-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div>
+                                <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Emisor:</p>
+                                <p class="font-bold">Ferretería Emmanuel S.A.</p>
+                                <p class="text-slate-500">RUC: 1234567890001</p>
+                                <p class="text-slate-500">Av. Principal Ferretera #45</p>
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-700 uppercase tracking-wider text-[10px]">Cliente:</p>
+                                <p class="font-bold">Constructora del Norte</p>
+                                <p class="text-slate-500">Atención: Ing. Roberto Gómez</p>
+                                <p class="text-slate-500">Contacto: cliente@constructora.com</p>
+                            </div>
+                        </div>
+
+                        <!-- Items Table -->
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b-2 border-slate-200 text-slate-600 uppercase text-[10px] tracking-wider">
+                                    <th class="py-2">Descripción</th>
+                                    <th class="py-2 text-center">Cant.</th>
+                                    <th class="py-2 text-right">P. Unit</th>
+                                    <th class="py-2 text-right">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr>
+                                    <td class="py-3 font-medium">Cemento Portland 50kg</td>
+                                    <td class="py-3 text-center">20</td>
+                                    <td class="py-3 text-right">$9.50</td>
+                                    <td class="py-3 text-right font-semibold">$190.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium">Taladro Percutor DeWalt 20V Max</td>
+                                    <td class="py-3 text-center">1</td>
+                                    <td class="py-3 text-right">$145.00</td>
+                                    <td class="py-3 text-right font-semibold">$145.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-3 font-medium">Juego de Llaves Combinadas (12 pzs)</td>
+                                    <td class="py-3 text-center">2</td>
+                                    <td class="py-3 text-right">$28.00</td>
+                                    <td class="py-3 text-right font-semibold">$56.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Totals Section -->
+                        <div class="flex justify-end pt-4 border-t border-slate-200">
+                            <div class="w-48 space-y-2">
+                                <div class="flex justify-between text-slate-500">
+                                    <span>Subtotal:</span>
+                                    <span>$391.00</span>
+                                </div>
+                                <div class="flex justify-between text-slate-500">
+                                    <span>IVA (15%):</span>
+                                    <span>$58.65</span>
+                                </div>
+                                <div class="flex justify-between text-lg font-black text-slate-900 border-t border-slate-300 pt-2">
+                                    <span>Total:</span>
+                                    <span class="text-amber-600">$449.65</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- SECTION 3: COLOR PALETTE -->
+        <section id="palette" class="space-y-6">
+            <div class="border-b border-slate-800 pb-4">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brand-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                    3. Paleta de Colores de Marca (Design Tokens)
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                    <div class="h-16 rounded-xl bg-[#F59E0B] shadow-inner"></div>
+                    <div>
+                        <p class="font-bold text-white text-sm">Amber Yellow</p>
+                        <p class="font-mono text-xs text-slate-400">#F59E0B</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Énfasis, Techo, Texto "EMMANUEL"</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                    <div class="h-16 rounded-xl bg-[#1E293B] shadow-inner"></div>
+                    <div>
+                        <p class="font-bold text-white text-sm">Slate Navy</p>
+                        <p class="font-mono text-xs text-slate-400">#1E293B</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Cuerpo Estructural del Logo</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                    <div class="h-16 rounded-xl bg-[#64748B] shadow-inner"></div>
+                    <div>
+                        <p class="font-bold text-white text-sm">Industrial Slate</p>
+                        <p class="font-mono text-xs text-slate-400">#64748B</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Borde Izquierdo y Sombras</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 space-y-3">
+                    <div class="h-16 rounded-xl bg-[#FCD34D] shadow-inner"></div>
+                    <div>
+                        <p class="font-bold text-white text-sm">Bright Accent</p>
+                        <p class="font-mono text-xs text-slate-400">#FCD34D</p>
+                        <p class="text-[11px] text-slate-500 mt-1">Línea Central de Repisa</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-20 border-t border-slate-800 py-8 text-center text-xs text-slate-500">
+        <p>Sistema de Vectores Creado para Ferretería Emmanuel • Listo para exportación a Cursor AI</p>
+    </footer>
+
+    <!-- JavaScript Interactivity -->
+    <script>
+        // Copy SVG Functionality
+        function copySvgCode(elementId, name) {
+            const svgElement = document.getElementById(elementId);
+            if (!svgElement) return;
+
+            // Clone SVG element to format string nicely
+            const svgString = svgElement.outerHTML;
+
+            // Fallback copy logic for iframe safety
+            const textArea = document.createElement("textarea");
+            textArea.value = svgString;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast(`¡SVG "${name}" copiado al portapapeles!`);
+            } catch (err) {
+                console.error('Error al copiar: ', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
+        // Show Toast Notification
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Switch Tabs for Interactive Mockup Screen
+        function switchTab(screenId) {
+            const screens = ['screen-login', 'screen-dashboard', 'screen-invoice'];
+            
+            screens.forEach(id => {
+                const screenEl = document.getElementById(id);
+                const tabBtn = document.getElementById(`tab-${id}`);
+
+                if (id === screenId) {
+                    screenEl.classList.remove('hidden');
+                    tabBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold transition bg-brand-yellow text-slate-950 shadow-md";
+                } else {
+                    screenEl.classList.add('hidden');
+                    tabBtn.className = "px-4 py-2 rounded-xl text-sm font-semibold text-slate-400 hover:text-white transition";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

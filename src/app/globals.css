@@ -1,0 +1,496 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --navy: #0f172a;
+  --slate: #334155;
+  --slate-blue: #475569;
+  --paper: #f8fafc;
+
+  /* Tokens Semánticos Dinámicos de Tema (Enterprise SaaS Standard) */
+  --theme-primary: #0f172a;
+  --theme-primary-hover: #1e293b;
+  --theme-primary-contrast: #ffffff;
+  --theme-accent-light: #f1f5f9;
+  --theme-accent-border: #cbd5e1;
+  --theme-ring: rgba(37, 99, 235, 0.2);
+  --theme-header-accent: #0f172a;
+
+  /* Encabezado y Navegación */
+  --theme-header-bg: #ffffff;
+  --theme-header-subnav-bg: #f1f5f9;
+  --theme-header-border: #e2e8f0;
+  --theme-header-input-bg: #f8fafc;
+  --theme-header-text: #0f172a;
+  --theme-header-text-muted: #64748b;
+  --theme-header-icon: #334155;
+}
+
+html,
+body {
+  background: var(--paper);
+  color: var(--navy);
+  min-height: 100%;
+}
+
+body {
+  font-family: Manrope, "Segoe UI", sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "tnum";
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==========================================================================
+   ENTERPRISE MINIMALISM: BOTONES COMPACTOS DE ALTA JERARQUÍA
+   ========================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  min-height: 2.125rem; /* 34px */
+  padding: 0.375rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem; /* 6px */
+  font-family: inherit;
+  font-size: 0.8125rem; /* 13px */
+  font-weight: 600;
+  line-height: 1.25;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-azul,
+.btn-navy {
+  background: #0F172A;
+  color: #FFFFFF;
+  border-color: #0F172A;
+}
+
+.btn-azul:hover,
+.btn-navy:hover {
+  background: #1E293B;
+  border-color: #1E293B;
+}
+
+.btn-amarillo {
+  background: var(--theme-primary, #0F172A);
+  color: var(--theme-primary-contrast, #FFFFFF);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.btn-amarillo:hover {
+  background: var(--theme-primary-hover, #1E293B);
+  color: var(--theme-primary-contrast, #FFFFFF);
+}
+
+.btn-rojo {
+  background: #FFFFFF;
+  color: #BE123C;
+  border-color: #FECDD3;
+}
+
+.btn-rojo:hover {
+  background: #FFF1F2;
+  border-color: #FDA4AF;
+}
+
+.btn-linea {
+  background: #FFFFFF;
+  color: #0F172A;
+  border-color: #E2E8F0;
+}
+
+.btn-linea:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+/* ==========================================================================
+   ENTERPRISE MINIMALISM: ACCESIBILIDAD Y ANILLOS DE ENFOQUE (WCAG AA)
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--theme-primary, #2563EB);
+  outline-offset: 1px;
+}
+
+/* ==========================================================================
+   ENTERPRISE MINIMALISM: CAMPOS DE FORMULARIO E INPUTS
+   ========================================================================== */
+.campo {
+  width: 100%;
+  min-height: 2.125rem; /* 34px */
+  border: 1px solid #E2E8F0;
+  border-radius: 0.375rem; /* 6px */
+  background: #FFFFFF;
+  padding: 0.375rem 0.625rem;
+  font-family: inherit;
+  font-size: 0.8125rem; /* 13px */
+  color: #0F172A;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.campo:focus {
+  outline: none;
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.etiqueta {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+/* ==========================================================================
+   ENTERPRISE MINIMALISM: TABLAS DE DATOS FINANCIEROS (STRIPE-GRADE)
+   ========================================================================== */
+.tabla {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem; /* 13px */
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla th {
+  padding: 0.5rem 0.75rem;
+  background: #F8FAFC;
+  color: #475569;
+  font-size: 0.6875rem; /* 11px */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+  border-bottom: 1px solid #E2E8F0;
+  border-top: 1px solid #E2E8F0;
+}
+
+.tabla td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+  color: #1E293B;
+}
+
+.tabla tbody tr:hover td {
+  background: #F8FAFC;
+}
+
+.tabla-kardex th {
+  background: #F8FAFC;
+  color: #475569;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.audit-row,
+.audit-row td,
+.audit-row a {
+  color: #be123c;
+}
+
+/* ==========================================================================
+   ENTERPRISE MINIMALISM: SUPERFICIES Y PANELES PLANOS (NO TARJETAS FLOTANTES)
+   ========================================================================== */
+.card {
+  background: #FFFFFF;
+  border-radius: 0.375rem; /* 6px */
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@page {
+  size: 11in 8.5in;
+  margin: 0.4in;
+}
+
+@page reporte-horizontal {
+  size: 11in 8.5in;
+  margin: 0.4in;
+}
+
+@page vertical-sheet {
+  size: 8.5in 11in;
+  margin: 0.4in;
+}
+
+.papel,
+.hoja-vertical {
+  page: vertical-sheet;
+}
+
+.hoja-kardex {
+  page: reporte-horizontal;
+}
+
+.hoja-reporte-institucional,
+.reporte-apaisado {
+  page: reporte-horizontal;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 8mm 10mm;
+  }
+
+  .papel,
+  .hoja-vertical {
+    page: vertical-sheet;
+  }
+
+  .hoja-reporte-institucional,
+  .hoja-kardex,
+  .reporte-apaisado {
+    page: reporte-horizontal;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  html,
+  body {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: #ffffff !important;
+  }
+
+  header.print\:hidden,
+  aside,
+  nav,
+  .mobile-bar,
+  .bottom-nav,
+  .no-print {
+    display: none !important;
+  }
+
+  main,
+  article,
+  .shell,
+  [class*="max-w-"] {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Documento formal limpio sin sombras de tarjeta ni esquinas redondeadas en papel */
+  .papel,
+  .hoja-impresion,
+  .hoja-reporte-institucional {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  .tabla-reporte-institucional,
+  .hoja-reporte-institucional table,
+  .tabla-institucional {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    page-break-inside: auto !important;
+  }
+
+  .hoja-reporte-institucional table,
+  .hoja-reporte-institucional th,
+  .hoja-reporte-institucional td,
+  .tabla-institucional th,
+  .tabla-institucional td {
+    border: 1px solid #000000 !important;
+    border-collapse: collapse !important;
+  }
+
+  /* REPETICIÓN OBLIGATORIA DE ENCABEZADOS Y CONTROL DE PAGINACIÓN INSTITUCIONAL */
+  .hoja-reporte-institucional thead {
+    display: table-header-group !important;
+  }
+
+  .hoja-reporte-institucional tbody {
+    display: table-row-group !important;
+  }
+
+  .hoja-reporte-institucional tr {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .hoja-reporte-institucional thead tr,
+  .hoja-reporte-institucional thead th {
+    background-color: #000000 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .hoja-reporte-institucional tbody tr,
+  .hoja-reporte-institucional tbody td {
+    background-color: transparent !important;
+    color: #000000 !important;
+    border: 1px solid #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .hoja-reporte-institucional table {
+    font-size: 8pt !important;
+  }
+
+  .hoja-reporte-institucional th {
+    padding: 3px 2px !important;
+    font-size: 7.5pt !important;
+    font-weight: bold !important;
+  }
+
+  .hoja-reporte-institucional td {
+    padding: 2.5px 3px !important;
+    font-size: 7.5pt !important;
+  }
+
+  .hoja-reporte-institucional img {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    filter: none !important;
+  }
+
+  .tabla-kardex {
+    min-width: 0 !important;
+    font-size: 8px;
+  }
+
+  .tabla-kardex th,
+  .tabla-kardex td {
+    padding: 2px 3px;
+  }
+
+  .kardex-head,
+  .tabla-kardex th {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .audit-row,
+  .audit-row td,
+  .audit-row a {
+    color: #be123c !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .tabla-kardex thead {
+    display: table-header-group;
+  }
+
+  .tabla-kardex tr,
+  .papel {
+    break-inside: avoid;
+  }
+
+  table.tabla {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  /* CAPA INDEPENDIENTE DE MARCA DE AGUA (DETRÁS DE TODO, NO OCUPA ESPACIO EN EL FLUJO) */
+  .watermark,
+  .marca-agua-fondo,
+  .marca-agua-impresion {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    opacity: 0.065 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .watermark-horizontal,
+  .marca-agua-horizontal {
+    width: 52% !important;
+    max-width: 600px !important;
+  }
+
+  .watermark-vertical,
+  .marca-agua-vertical {
+    width: 55% !important;
+    max-width: 480px !important;
+  }
+}
+
+/* MARCA DE AGUA INDEPENDIENTE EN PANTALLA (DETRÁS DEL CONTENIDO) */
+.watermark,
+.marca-agua-fondo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.065;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.watermark-horizontal,
+.marca-agua-horizontal {
+  width: 52%;
+  max-width: 600px;
+}
+
+.watermark-vertical,
+.marca-agua-vertical {
+  width: 55%;
+  max-width: 480px;
+}
+
+.marca-agua-impresion {
+  display: none;
+}
+
