@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   autenticar,
   crearSesion,
@@ -14,41 +15,51 @@ import {
 import { conParam, mensaje, refrescar, type ResultadoAccion } from "./helpers";
 
 export async function loginAction(_previo: ResultadoAccion, formData: FormData): Promise<ResultadoAccion> {
-  const usuarioInput = String(formData.get("usuario") || "").trim();
-  const clave = String(formData.get("clave") || "");
-  const recordar = formData.get("recordar") === "on";
-  const volver = String(formData.get("volver") || "/inicio");
+  try {
+    const usuarioInput = String(formData.get("usuario") || "").trim();
+    const clave = String(formData.get("clave") || "");
+    const recordar = formData.get("recordar") === "on";
+    const volver = String(formData.get("volver") || "/inicio");
 
-  const res = await autenticar(usuarioInput, clave);
-  if (!res.ok) {
-    return { ok: false, error: res.error };
-  }
+    const res = await autenticar(usuarioInput, clave);
+    if (!res.ok) {
+      return { ok: false, error: res.error };
+    }
 
-  await crearSesion(res.usuario, recordar);
-  refrescar();
-  if (res.usuario.debeCambiarClave) {
-    redirect("/cambiar-clave-obligatoria");
+    await crearSesion(res.usuario, recordar);
+    refrescar();
+    if (res.usuario.debeCambiarClave) {
+      redirect("/cambiar-clave-obligatoria");
+    }
+    redirect(volver);
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    return { ok: false, error: mensaje(err) };
   }
-  redirect(volver);
 }
 
 export async function ingresar(formData: FormData) {
-  const usuarioInput = String(formData.get("usuario") || "").trim();
-  const clave = String(formData.get("clave") || "");
-  const recordar = formData.get("recordar") === "on";
-  const volver = String(formData.get("volver") || "/inicio");
+  try {
+    const usuarioInput = String(formData.get("usuario") || "").trim();
+    const clave = String(formData.get("clave") || "");
+    const recordar = formData.get("recordar") === "on";
+    const volver = String(formData.get("volver") || "/inicio");
 
-  const res = await autenticar(usuarioInput, clave);
-  if (!res.ok) {
-    redirect(conParam("/", "error", res.error));
-  }
+    const res = await autenticar(usuarioInput, clave);
+    if (!res.ok) {
+      redirect(conParam("/", "error", res.error));
+    }
 
-  await crearSesion(res.usuario, recordar);
-  refrescar();
-  if (res.usuario.debeCambiarClave) {
-    redirect("/cambiar-clave-obligatoria");
+    await crearSesion(res.usuario, recordar);
+    refrescar();
+    if (res.usuario.debeCambiarClave) {
+      redirect("/cambiar-clave-obligatoria");
+    }
+    redirect(volver);
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    redirect(conParam("/", "error", mensaje(err)));
   }
-  redirect(volver);
 }
 
 export async function solicitarRecuperacionAction(
@@ -56,8 +67,7 @@ export async function solicitarRecuperacionAction(
   formData: FormData,
 ) {
   const usuarioOEmail = String(formData.get("usuarioOEmail") || "");
-  const res = await solicitarRestablecimiento(usuarioOEmail);
-  return res;
+  return solicitarRestablecimiento(usuarioOEmail);
 }
 
 export async function salir() {
@@ -105,6 +115,7 @@ export async function guardarUsuarioAction(formData: FormData) {
     }
     await guardarConfiguracion(actual);
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     redirect(conParam("/configuracion?tab=usuarios", "error", mensaje(error)));
   }
   refrescar();
@@ -119,10 +130,10 @@ export async function eliminarUsuarioAction(formData: FormData) {
     const id = String(formData.get("id") || "");
 
     await eliminarUsuarioCuenta(id);
-
     actual.usuarios = actual.usuarios.filter((u) => u.id !== id);
     await guardarConfiguracion(actual);
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     redirect(conParam("/configuracion?tab=usuarios", "error", mensaje(error)));
   }
   refrescar();

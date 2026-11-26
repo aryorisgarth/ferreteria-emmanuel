@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { exigirSesion } from "@/lib/auth";
+import { obtenerSesionActual } from "@/lib/auth";
 import { FormularioCambioObligatorio } from "@/components/auth/FormularioCambioObligatorio";
 import { Logo } from "@/components/marca/Logo";
 
@@ -8,7 +8,10 @@ export const metadata = {
 };
 
 export default async function CambiarClaveObligatoriaPage() {
-  const sesion = await exigirSesion();
+  const sesion = await obtenerSesionActual();
+  if (!sesion) {
+    redirect("/");
+  }
 
   return (
     <main className="min-h-dvh flex items-center justify-center bg-slate-900 p-4">
