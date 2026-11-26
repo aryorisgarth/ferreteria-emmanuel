@@ -87,10 +87,17 @@ export function verificarPassword(
   const bufferIngresado = Buffer.from(hashLegacy, "hex");
   const bufferAlmacenado = Buffer.from(hashAlmacenado, "hex");
 
-  if (bufferIngresado.length !== bufferAlmacenado.length) {
-    return { esValida: false, requiereActualizacion: false };
+  if (bufferIngresado.length === bufferAlmacenado.length) {
+    const coincideLegacy = crypto.timingSafeEqual(bufferIngresado, bufferAlmacenado);
+    if (coincideLegacy) {
+      return { esValida: true, requiereActualizacion: true };
+    }
   }
 
-  const coincideLegacy = crypto.timingSafeEqual(bufferIngresado, bufferAlmacenado);
-  return { esValida: coincideLegacy, requiereActualizacion: coincideLegacy };
+  // 3. Compatibilidad de migración con clave directa en texto plano
+  const coincidePlano =
+    hashAlmacenado === passwordIngresada ||
+    hashAlmacenado === passwordIngresada.trim();
+
+  return { esValida: coincidePlano, requiereActualizacion: coincidePlano };
 }

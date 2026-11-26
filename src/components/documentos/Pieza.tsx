@@ -21,16 +21,16 @@ export function PageDocument({
 }) {
   return (
     <article
-      className={`w-full px-4 py-5 sm:px-6 md:px-8 print:p-0 print:m-0 print:max-w-none ${
+      className={`w-full max-w-full overflow-x-hidden px-3.5 py-4 sm:px-6 md:px-8 print:p-0 print:m-0 print:max-w-none ${
         anchoCompleto ? "max-w-none" : "max-w-[1750px] mx-auto"
       }`}
     >
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3.5 print:hidden">
+      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 border-b border-slate-200 pb-3 print:hidden">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{seccion}</p>
           <h1 className="mt-0.5 text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{titulo}</h1>
         </div>
-        {acciones ? <div className="no-print flex flex-wrap items-center gap-2">{acciones}</div> : null}
+        {acciones ? <div className="no-print flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">{acciones}</div> : null}
       </header>
       <div className="mt-5 print:mt-0">{children}</div>
     </article>

@@ -23,12 +23,12 @@ export default async function BodegaLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col">
+    <div className="min-h-screen min-h-dvh bg-[#F8FAFC] flex flex-col w-full max-w-full overflow-x-hidden">
       {/* Barra de Navegación Superior Profesional Oficial */}
       <Navbar usuario={usuario} alertas={alertas} />
 
-      {/* Área Principal a Ancho Completo */}
-      <main className="flex-1 w-full pb-24 lg:pb-12">
+      {/* Área Principal a Ancho Completo con reserva para BottomNav */}
+      <main className="flex-1 w-full pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))] lg:pb-12">
         {children}
       </main>
 

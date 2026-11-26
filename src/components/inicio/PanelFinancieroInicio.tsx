@@ -12,7 +12,7 @@ export function PanelFinancieroInicio({ resumen }: { resumen: any }) {
   return (
     <div className="mt-3 grid gap-3 lg:grid-cols-3">
       {/* Panel Financiero */}
-      <div className="bg-slate-900 text-white rounded-md p-5 border border-slate-800 lg:col-span-2 flex flex-col justify-between">
+      <div className="bg-slate-900 text-white rounded-md p-3.5 sm:p-5 border border-slate-800 lg:col-span-2 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2 text-slate-200 text-xs font-bold uppercase tracking-wider">
@@ -51,7 +51,7 @@ export function PanelFinancieroInicio({ resumen }: { resumen: any }) {
       </div>
 
       {/* Estado del Turno de Caja */}
-      <div className="card p-5 flex flex-col justify-between">
+      <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between border-b border-slate-100 pb-3">
             <div className="flex items-center gap-2">

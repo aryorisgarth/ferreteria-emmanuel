@@ -16,8 +16,8 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/98 px-2 py-1 backdrop-blur-xs lg:hidden shadow-xs safe-bottom print:hidden">
-      <div className="grid grid-cols-5 gap-1">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] lg:hidden print:hidden select-none">
+      <div className="grid grid-cols-5 gap-1 max-w-lg mx-auto">
         {ITEMS.map((item) => {
           const Icono = item.icon;
           const activo =
@@ -29,19 +29,19 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded py-0.5 transition ${
+              className={`flex h-12 min-h-[48px] flex-col items-center justify-center gap-1 rounded-lg py-1 transition active:scale-95 cursor-pointer ${
                 activo
-                  ? "bg-slate-100 text-slate-900 font-bold"
-                  : "text-slate-500 hover:text-slate-800"
+                  ? "text-[var(--theme-primary,#0F172A)] font-bold bg-slate-50"
+                  : "text-slate-500 hover:text-slate-900"
               }`}
             >
               <div className="relative">
-                <Icono size={18} className={activo ? "text-slate-900" : "text-slate-400"} />
+                <Icono size={20} className={activo ? "text-[var(--theme-primary,#0F172A)]" : "text-slate-400"} />
                 {activo && (
-                  <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-0.5 w-3 rounded-full bg-[var(--theme-primary,#0F172A)]" />
+                  <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 h-0.5 w-3.5 rounded-full bg-[var(--theme-primary,#0F172A)]" />
                 )}
               </div>
-              <span className="text-[10px] tracking-tight">{item.label}</span>
+              <span className="text-[11px] leading-tight tracking-tight">{item.label}</span>
             </Link>
           );
         })}
