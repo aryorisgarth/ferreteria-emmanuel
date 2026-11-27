@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useTransition, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useTransition,
+  useCallback,
+  type ReactNode,
+} from "react";
 import {
   TEMAS_SISTEMA,
   TEMA_PREDETERMINADO,
@@ -10,6 +18,8 @@ import {
   type TemaConfig,
   type TemaId,
 } from "@/lib/theme";
+import { fijarTemaAction } from "@/app/actions/tema.actions";
+import { useSincronizacionTema } from "./useSincronizacionTema";
 
 interface ThemeContextType {
   temaActual: TemaConfig;
@@ -27,28 +37,45 @@ const ThemeContext = createContext<ThemeContextType | null>(null);
 interface ThemeProviderProps {
   children: ReactNode;
   usuarioInicial?: string;
+  temaInicial?: TemaId;
 }
 
-export function ThemeProvider({ children, usuarioInicial = "" }: ThemeProviderProps) {
+export function ThemeProvider({
+  children,
+  usuarioInicial = "",
+  temaInicial = TEMA_PREDETERMINADO,
+}: ThemeProviderProps) {
   const [usuario, setUsuario] = useState(usuarioInicial);
-  const [temaGuardadoId, setTemaGuardadoId] = useState<TemaId>(TEMA_PREDETERMINADO);
+  const [temaGuardadoId, setTemaGuardadoId] = useState<TemaId>(temaInicial);
   const [temaPreviewId, setTemaPreviewId] = useState<TemaId | null>(null);
   const [, startTransition] = useTransition();
 
-  // Detectar usuario desde cookies o props si no se pasó inicialmente
   useEffect(() => {
     if (!usuario && typeof document !== "undefined") {
       const match = document.cookie.match(/(?:^|;\s*)fe_usuario=([^;]+)/);
-      if (match && match[1]) {
-        setUsuario(decodeURIComponent(match[1]));
-      }
+      if (match?.[1]) setUsuario(decodeURIComponent(match[1]));
     }
   }, [usuario]);
 
-  // Cargar tema persistido para este usuario específico
+  const manejarTemaRemoto = useCallback(
+    (nuevoTema: TemaId) => {
+      setTemaGuardadoId(nuevoTema);
+      try {
+        localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), nuevoTema);
+      } catch {}
+      if (!temaPreviewId) aplicarTemaDocumento(resolverTema(nuevoTema));
+    },
+    [usuario, temaPreviewId]
+  );
+
+  const { emitirTemaLocal } = useSincronizacionTema({
+    usuario,
+    temaGuardadoId,
+    onTemaRemoto: manejarTemaRemoto,
+  });
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-
     try {
       const storageKey = obtenerClaveAlmacenamientoTema(usuario);
       const guardado = localStorage.getItem(storageKey);
@@ -56,45 +83,39 @@ export function ThemeProvider({ children, usuarioInicial = "" }: ThemeProviderPr
         setTemaGuardadoId(guardado as TemaId);
         aplicarTemaDocumento(TEMAS_SISTEMA[guardado as TemaId]);
       } else {
-        setTemaGuardadoId(TEMA_PREDETERMINADO);
-        aplicarTemaDocumento(TEMAS_SISTEMA[TEMA_PREDETERMINADO]);
+        aplicarTemaDocumento(resolverTema(temaGuardadoId));
       }
     } catch {
-      aplicarTemaDocumento(TEMAS_SISTEMA[TEMA_PREDETERMINADO]);
+      aplicarTemaDocumento(resolverTema(temaGuardadoId));
     }
-  }, [usuario]);
+  }, [usuario, temaGuardadoId]);
 
   const previsualizarTema = (id: TemaId) => {
     setTemaPreviewId(id);
-    const cfg = resolverTema(id);
-    aplicarTemaDocumento(cfg);
+    aplicarTemaDocumento(resolverTema(id));
   };
 
   const descartarVistaPrevia = () => {
     setTemaPreviewId(null);
-    const cfg = resolverTema(temaGuardadoId);
-    aplicarTemaDocumento(cfg);
+    aplicarTemaDocumento(resolverTema(temaGuardadoId));
   };
 
   const guardarTema = (id: TemaId) => {
-    startTransition(() => {
-      setTemaGuardadoId(id);
-      setTemaPreviewId(null);
-      const cfg = resolverTema(id);
-      aplicarTemaDocumento(cfg);
+    setTemaGuardadoId(id);
+    setTemaPreviewId(null);
+    aplicarTemaDocumento(resolverTema(id));
 
-      try {
-        const storageKey = obtenerClaveAlmacenamientoTema(usuario);
-        localStorage.setItem(storageKey, id);
-      } catch (err) {
-        console.error("No se pudo persistir el tema en localStorage:", err);
-      }
+    try {
+      localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), id);
+    } catch {}
+
+    emitirTemaLocal(id);
+    startTransition(async () => {
+      await fijarTemaAction(id);
     });
   };
 
-  const restaurarPredeterminado = () => {
-    guardarTema(TEMA_PREDETERMINADO);
-  };
+  const restaurarPredeterminado = () => guardarTema(TEMA_PREDETERMINADO);
 
   const temaActual = resolverTema(temaPreviewId || temaGuardadoId);
   const temaPreview = temaPreviewId ? resolverTema(temaPreviewId) : null;

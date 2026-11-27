@@ -35,6 +35,7 @@ export interface UsuarioCuenta {
   bloqueadoHasta?: string | null;
   ultimoAcceso?: string | null;
   modificadoPor?: string | null;
+  tema?: string | null;
   creadoEn: string;
 }
 
@@ -426,6 +427,15 @@ export async function crearSesion(usuario: UsuarioCuenta, recordar = false) {
     path: "/",
     maxAge,
   });
+
+  if (usuario.tema) {
+    jar.set("fe_tema", usuario.tema, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
 }
 
 /**

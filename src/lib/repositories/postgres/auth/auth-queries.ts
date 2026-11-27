@@ -106,3 +106,37 @@ export async function dbBuscarPorId(
     creadoEn: r.creadoEn ? new Date(r.creadoEn).toISOString().split("T")[0] : "2026-01-01",
   };
 }
+
+export async function dbObtenerTemaUsuario(
+  executor: SqlExecutor,
+  usuarioOId: string
+): Promise<string> {
+  try {
+    const clean = usuarioOId.trim().toLowerCase();
+    const res = await executor.query(
+      `SELECT tema FROM usuarios_cuentas WHERE LOWER(usuario) = $1 OR id = $1 LIMIT 1`,
+      [clean]
+    );
+    return res.rows.length > 0 && res.rows[0].tema ? String(res.rows[0].tema) : "emmanuel";
+  } catch {
+    return "emmanuel";
+  }
+}
+
+export async function dbGuardarTemaUsuario(
+  executor: SqlExecutor,
+  usuarioOId: string,
+  tema: string
+): Promise<boolean> {
+  try {
+    const clean = usuarioOId.trim().toLowerCase();
+    const res = await executor.query(
+      `UPDATE usuarios_cuentas SET tema = $2, actualizado_en = NOW() WHERE LOWER(usuario) = $1 OR id = $1`,
+      [clean, tema]
+    );
+    return (res.rowCount ?? 0) > 0;
+  } catch (err) {
+    console.warn("[Tema] Error al persistir tema en PostgreSQL:", err);
+    return false;
+  }
+}

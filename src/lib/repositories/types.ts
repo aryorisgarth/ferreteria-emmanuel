@@ -184,6 +184,8 @@ export interface IAuthRepository {
   restablecerPasswordConToken?(tokenPlano: string, nuevoPasswordHash: string): Promise<boolean>;
   restablecerAccesoAdmin?(usuarioId: string, claveTemporalHash: string, adminUsuario: string): Promise<boolean>;
   cambiarPasswordObligatorio?(usuarioId: string, nuevoPasswordHash: string): Promise<boolean>;
+  obtenerTemaUsuario?(usuarioOId: string): Promise<string>;
+  guardarTemaUsuario?(usuarioOId: string, tema: string): Promise<boolean>;
 }
 
 // ============================================================================

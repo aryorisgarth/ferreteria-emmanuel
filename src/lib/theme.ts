@@ -48,3 +48,24 @@ export function resolverTema(id?: string | null): TemaConfig {
   }
   return TEMAS_SISTEMA[TEMA_PREDETERMINADO];
 }
+
+export function generarVariablesCssTema(tema: TemaConfig): string {
+  return `
+    :root {
+      --theme-primary: ${tema.colorHex};
+      --theme-primary-hover: ${tema.hoverHex};
+      --theme-primary-contrast: ${tema.contrastHex};
+      --theme-accent-light: ${tema.accentLightHex};
+      --theme-accent-border: ${tema.accentBorderHex};
+      --theme-ring: ${tema.ringRgba};
+      --theme-header-accent: ${tema.headerAccentHex};
+      --theme-header-bg: ${tema.headerBg};
+      --theme-header-subnav-bg: ${tema.headerSubnavBg};
+      --theme-header-border: ${tema.headerBorder};
+      --theme-header-input-bg: ${tema.headerInputBg};
+      --theme-header-text: ${tema.headerText};
+      --theme-header-text-muted: ${tema.headerTextMuted};
+      --theme-header-icon: ${tema.headerIcon};
+    }
+  `.replace(/\s+/g, " ");
+}

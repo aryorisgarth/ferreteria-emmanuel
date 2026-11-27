@@ -9,6 +9,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { WakeLockProvider } from "@/components/pwa/WakeLockProvider";
+import { resolverTema, generarVariablesCssTema, type TemaId } from "@/lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -51,13 +52,18 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const usuario = cookieStore.get("fe_usuario")?.value || "";
+  const cookieTema = (cookieStore.get("fe_tema")?.value || "emmanuel") as TemaId;
+  const temaConfig = resolverTema(cookieTema);
+  const cssVariables = generarVariablesCssTema(temaConfig);
 
   return (
-    <html lang="es" suppressHydrationWarning className="h-full">
-      <head />
+    <html lang="es" suppressHydrationWarning className="h-full" data-theme={temaConfig.id}>
+      <head>
+        <style id="fe-theme-inline" dangerouslySetInnerHTML={{ __html: cssVariables }} />
+      </head>
       <body className="h-full bg-[#F8FAFC] font-body text-slate-900 antialiased selection:bg-brand-yellow/30 selection:text-slate-900">
         <ToastProvider>
-          <ThemeProvider usuarioInicial={usuario}>
+          <ThemeProvider usuarioInicial={usuario} temaInicial={temaConfig.id}>
             <WakeLockProvider>
               <ServiceWorkerRegistrar />
               {children}

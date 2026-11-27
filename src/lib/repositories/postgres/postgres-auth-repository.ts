@@ -5,6 +5,8 @@ import {
   dbObtenerUsuarios,
   dbBuscarPorUsuario,
   dbBuscarPorId,
+  dbObtenerTemaUsuario,
+  dbGuardarTemaUsuario,
 } from "./auth/auth-queries";
 import {
   dbGuardarUsuarios,
@@ -92,5 +94,13 @@ export class PostgresAuthRepository implements IAuthRepository {
 
   async cambiarPasswordObligatorio(usuarioId: string, nuevoPasswordHash: string) {
     return dbCambiarPasswordObligatorio(this.executor, usuarioId, nuevoPasswordHash);
+  }
+
+  async obtenerTemaUsuario(usuarioOId: string): Promise<string> {
+    return dbObtenerTemaUsuario(this.executor, usuarioOId);
+  }
+
+  async guardarTemaUsuario(usuarioOId: string, tema: string): Promise<boolean> {
+    return dbGuardarTemaUsuario(this.executor, usuarioOId, tema);
   }
 }

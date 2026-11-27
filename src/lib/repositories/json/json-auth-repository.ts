@@ -105,4 +105,28 @@ export class JsonAuthRepository implements IAuthRepository {
 
   cambiarPasswordObligatorio = (usuarioId: string, nuevoPasswordHash: string) =>
     this.recovery.cambiarPasswordObligatorio(usuarioId, nuevoPasswordHash);
+
+  async obtenerTemaUsuario(usuarioOId: string): Promise<string> {
+    const usuarios = obtenerUsuariosJson();
+    const clean = usuarioOId.trim().toLowerCase();
+    const u = usuarios.find((usr) => usr.usuario.toLowerCase() === clean || usr.id === usuarioOId);
+    return (u && (u as any).tema) || "emmanuel";
+  }
+
+  async guardarTemaUsuario(usuarioOId: string, tema: string): Promise<boolean> {
+    const usuarios = obtenerUsuariosJson();
+    const clean = usuarioOId.trim().toLowerCase();
+    let modificado = false;
+    const actualizados = usuarios.map((usr) => {
+      if (usr.usuario.toLowerCase() === clean || usr.id === usuarioOId) {
+        modificado = true;
+        return { ...usr, tema };
+      }
+      return usr;
+    });
+    if (modificado) {
+      guardarUsuariosJson(actualizados);
+    }
+    return modificado;
+  }
 }
