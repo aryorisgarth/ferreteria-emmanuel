@@ -23,12 +23,12 @@ export default async function BodegaLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="h-dvh max-h-dvh w-full max-w-full grid grid-rows-[auto_minmax(0,1fr)_auto] overflow-hidden bg-[#F8FAFC]">
-      {/* 1. HEADER: permanente, siempre visible */}
+    <div className="fixed inset-0 h-full w-full flex flex-col overflow-hidden bg-[#F8FAFC]">
+      {/* 1. HEADER: permanente, siempre visible con safe-area */}
       <Navbar usuario={usuario} alertas={alertas} />
 
       {/* 2. MAIN: único contenedor principal con desplazamiento vertical */}
-      <main className="min-h-0 min-w-0 w-full overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
+      <main className="flex-1 min-h-0 min-w-0 w-full overflow-y-auto overscroll-y-contain [-webkit-overflow-scrolling:touch]">
         {children}
       </main>
 

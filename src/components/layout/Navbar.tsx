@@ -68,6 +68,7 @@ export function Navbar({ usuario, alertas }: NavbarProps) {
           backgroundColor: "var(--theme-header-bg, #FFFFFF)",
           borderColor: "var(--theme-header-border, #E2E8F0)",
           color: "var(--theme-header-text, #0F172A)",
+          paddingTop: "env(safe-area-inset-top, 0px)",
         }}
         className="w-full shrink-0 z-40 border-b shadow-2xs transition-colors duration-200 print:hidden"
       >
