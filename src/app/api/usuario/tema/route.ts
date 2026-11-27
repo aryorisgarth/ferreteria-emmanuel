@@ -13,8 +13,10 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const sesion = await obtenerSesionActual();
-    if (!sesion?.usuario) {
-      const jar = await cookies();
+    const jar = await cookies();
+    const usuario = sesion?.usuario || jar.get("fe_usuario")?.value;
+
+    if (!usuario) {
       const cookieTema = (jar.get("fe_tema")?.value || "emmanuel") as TemaId;
       return NextResponse.json(
         { tema: resolverTema(cookieTema).id, usuario: null },
@@ -25,12 +27,12 @@ export async function GET() {
     const repo = getAuthRepository();
     let tema = "emmanuel";
     if ("obtenerTemaUsuario" in repo && typeof repo.obtenerTemaUsuario === "function") {
-      tema = await repo.obtenerTemaUsuario(sesion.usuario);
+      tema = await repo.obtenerTemaUsuario(usuario);
     }
 
     const temaResuelto = resolverTema(tema).id;
     return NextResponse.json(
-      { tema: temaResuelto, usuario: sesion.usuario },
+      { tema: temaResuelto, usuario },
       { headers: { "Cache-Control": "no-store, max-age=0" } }
     );
   } catch (err) {

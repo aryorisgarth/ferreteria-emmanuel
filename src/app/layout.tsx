@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import { WakeLockProvider } from "@/components/pwa/WakeLockProvider";
 import { resolverTema, generarVariablesCssTema, type TemaId } from "@/lib/theme";
+import { getAuthRepository } from "@/lib/repositories";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -52,8 +53,20 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
   const usuario = cookieStore.get("fe_usuario")?.value || "";
-  const cookieTema = (cookieStore.get("fe_tema")?.value || "emmanuel") as TemaId;
-  const temaConfig = resolverTema(cookieTema);
+  let temaId = cookieStore.get("fe_tema")?.value as TemaId | undefined;
+
+  if (!temaId && usuario) {
+    try {
+      const repo = getAuthRepository();
+      if ("obtenerTemaUsuario" in repo && typeof repo.obtenerTemaUsuario === "function") {
+        temaId = (await repo.obtenerTemaUsuario(usuario)) as TemaId;
+      }
+    } catch {
+      temaId = "emmanuel";
+    }
+  }
+
+  const temaConfig = resolverTema(temaId || "emmanuel");
   const cssVariables = generarVariablesCssTema(temaConfig);
 
   return (

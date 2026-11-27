@@ -57,9 +57,12 @@ export function useSincronizacionTema({
     };
   }, [usuario, onTemaRemoto]);
 
-  // Sincronización pasiva servidor (focus, visibility y sondeo suave)
+  // Sincronización pasiva servidor (inmediata al montar, focus, visibility y sondeo suave)
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    // Consulta inicial inmediata al cargar en cualquier dispositivo
+    consultarTemaServidor();
 
     const onVisibilidad = () => {
       if (!document.hidden) {

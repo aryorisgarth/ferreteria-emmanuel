@@ -69,7 +69,7 @@ export function Navbar({ usuario, alertas }: NavbarProps) {
           borderColor: "var(--theme-header-border, #E2E8F0)",
           color: "var(--theme-header-text, #0F172A)",
         }}
-        className="sticky top-0 z-40 w-full border-b shadow-2xs transition-colors duration-200 print:hidden"
+        className="w-full shrink-0 z-40 border-b shadow-2xs transition-colors duration-200 print:hidden"
       >
         <div className="flex h-[52px] w-full items-center justify-between px-3 sm:px-5 lg:px-6 gap-3">
           <div className="flex items-center gap-3 sm:gap-4 lg:gap-5 min-w-0">
@@ -85,9 +85,8 @@ export function Navbar({ usuario, alertas }: NavbarProps) {
                   backgroundColor: pathname === "/inicio" ? "var(--theme-header-subnav-bg, #F1F5F9)" : undefined,
                   borderColor: pathname === "/inicio" ? "var(--theme-header-border, #E2E8F0)" : "transparent",
                 }}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition ${
-                  pathname === "/inicio" ? "font-bold shadow-2xs" : "hover:bg-slate-100"
-                }`}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition ${pathname === "/inicio" ? "font-bold shadow-2xs" : "hover:bg-slate-100"
+                  }`}
               >
                 <LayoutDashboard size={14} style={{ color: "var(--theme-header-icon, #334155)" }} />
                 <span>Control</span>

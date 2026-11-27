@@ -16,7 +16,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] lg:hidden print:hidden select-none">
+    <nav className="w-full shrink-0 z-40 border-t border-slate-200 bg-white px-2 pt-1 pb-[max(0.35rem,env(safe-area-inset-bottom,0px))] shadow-[0_-2px_10px_rgba(0,0,0,0.06)] lg:hidden print:hidden select-none">
       <div className="grid grid-cols-5 gap-1 max-w-lg mx-auto">
         {ITEMS.map((item) => {
           const Icono = item.icon;

@@ -62,6 +62,7 @@ export function ThemeProvider({
       setTemaGuardadoId(nuevoTema);
       try {
         localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), nuevoTema);
+        document.cookie = `fe_tema=${encodeURIComponent(nuevoTema)}; path=/; max-age=31536000; SameSite=Lax`;
       } catch {}
       if (!temaPreviewId) aplicarTemaDocumento(resolverTema(nuevoTema));
     },

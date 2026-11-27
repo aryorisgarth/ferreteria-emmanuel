@@ -34,11 +34,11 @@ export function NavActionsRight({
           backgroundColor: "var(--theme-primary, #0F172A)",
           color: "var(--theme-primary-contrast, #FFFFFF)",
         }}
-        className="inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 sm:px-3 text-xs font-bold shadow-xs transition hover:bg-slate-800 active:scale-95 shrink-0"
+        className="hidden sm:inline-flex h-8 items-center gap-1.5 rounded-md px-2.5 sm:px-3 text-xs font-bold shadow-xs transition hover:bg-slate-800 active:scale-95 shrink-0"
       >
         <ShoppingCart size={13} />
-        <span className="hidden sm:inline">Punto de Venta</span>
-        <span className="sm:hidden">Caja</span>
+        <span className="hidden md:inline">Punto de Venta</span>
+        <span className="md:hidden">POS</span>
         <kbd className="hidden xl:inline rounded bg-white/20 px-1 py-0.2 text-[9px] font-mono font-extrabold text-white">
           F1
         </kbd>
