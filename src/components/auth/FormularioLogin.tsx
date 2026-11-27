@@ -20,8 +20,12 @@ export function FormularioLogin({ errorInicial, volverUrl = "/inicio" }: Formula
 
   return (
     <div className="relative flex w-full h-[100dvh] min-h-[100dvh] bg-slate-950 overflow-hidden select-none">
-      {/* HEADER ÚNICO RESPONSIVE */}
-      <header className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-3 sm:px-6 py-2.5 pt-[calc(0.6rem+env(safe-area-inset-top,0px))] pointer-events-none">
+      {/* HEADER FLOTANTE SOBRE LA MAQUETA */}
+      <header
+        className={`absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-3 sm:px-6 py-2.5 pt-[calc(0.6rem+env(safe-area-inset-top,0px))] pointer-events-none transition-opacity duration-300 ${
+          !panelVisible ? "flex" : "hidden lg:flex"
+        }`}
+      >
         <div className="pointer-events-auto flex items-center gap-2">
           <div className="flex items-center gap-2 bg-slate-900/85 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-800 backdrop-blur-md shadow-md">
             <Logo variante="light" className="h-6 sm:h-8 w-auto" prioridad />

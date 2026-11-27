@@ -27,17 +27,18 @@ export function PanelFormularioLogin({
 
   return (
     <div className="relative flex flex-col justify-between w-full h-full bg-white border-l border-slate-200 text-slate-800 shadow-2xl overflow-y-auto">
-      {/* Botón superior minimalista: solo flecha para ocultar */}
-      <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-100">
+      {/* Cabecera superior con safe-area y flecha para ver maqueta */}
+      <div className="flex items-center justify-between px-4 sm:px-6 pt-[max(0.85rem,env(safe-area-inset-top,0px))] pb-3 border-b border-slate-100/90 bg-white sticky top-0 z-10">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Acceso al Sistema</span>
         <button
           type="button"
           onClick={onOcultar}
-          title="Ocultar formulario y ver escena completa"
-          aria-label="Ocultar formulario"
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
+          title="Ver maqueta arquitectónica"
+          aria-label="Ver maqueta"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs border border-slate-200 shadow-2xs transition active:scale-95 cursor-pointer"
         >
-          <ChevronRight size={18} />
+          <span>Ver maqueta</span>
+          <ChevronRight size={16} />
         </button>
       </div>
 
