@@ -38,6 +38,7 @@ export default async function TotalDelDia({
       titulo="Consolidado de Despachos del Día"
       folio={fecha}
       ancho="pliego"
+      volverUrl="/inicio"
       acciones={
         <button
           onClick={undefined}

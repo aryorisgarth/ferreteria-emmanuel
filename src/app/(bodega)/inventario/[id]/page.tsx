@@ -50,15 +50,9 @@ export default async function ArticuloPage({
       seccion={`Inventario · ${articulo.codigo}`}
       titulo={articulo.nombre}
       folio={articulo.codigo}
+      volverUrl="/inventario"
       acciones={
         <div className="flex items-center gap-2">
-          <Link
-            href="/inventario"
-            className="btn h-10 px-4 text-xs font-bold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 gap-1.5"
-          >
-            <ArrowLeft size={16} />
-            Catálogo
-          </Link>
           <Link
             className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs"
             href={`/kardex?producto=${articulo.id}`}

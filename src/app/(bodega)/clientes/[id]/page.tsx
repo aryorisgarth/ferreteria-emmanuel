@@ -47,6 +47,7 @@ export default async function ClienteDetallePage({
     <PageDocument
       seccion="Clientes"
       titulo={`Perfil: ${cliente.nombre}`}
+      volverUrl="/clientes"
       acciones={
         <div className="flex items-center gap-2">
           <Link className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/cotizaciones/nueva">
@@ -56,10 +57,6 @@ export default async function ClienteDetallePage({
           <Link className="btn btn-azul h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/facturas/nueva">
             <Receipt size={15} />
             Nueva Factura
-          </Link>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href="/clientes">
-            <ArrowLeft size={15} />
-            Volver
           </Link>
         </div>
       }

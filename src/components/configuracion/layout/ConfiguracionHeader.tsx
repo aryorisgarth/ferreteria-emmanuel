@@ -4,6 +4,7 @@ import React from "react";
 import { Settings, ShieldCheck, HardDrive } from "lucide-react";
 import type { SeccionConfiguracionId } from "../types";
 import { GRUPOS_CONFIGURACION } from "./navigation-items";
+import { BotonVolver } from "@/components/ui/BotonVolver";
 
 interface ConfiguracionHeaderProps {
   seccionActiva: SeccionConfiguracionId;
@@ -24,7 +25,8 @@ export function ConfiguracionHeader({
         <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
           Administración · {itemActual?.label || "General"}
         </p>
-        <div className="flex items-center gap-2 mt-0.5">
+        <div className="flex items-center gap-2.5 mt-0.5">
+          <BotonVolver rutaPorDefecto="/inicio" />
           <Settings size={20} className="text-slate-800" />
           <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
             Centro de Configuración

@@ -38,12 +38,7 @@ export default async function DevolucionClientePage({
     <PageDocument
       seccion="Facturación y Ventas"
       titulo={`Devolución · Factura ${factura.numero}`}
-      acciones={
-        <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href={`/facturas/${factura.id}`}>
-          <ArrowLeft size={15} />
-          Volver a la Factura
-        </Link>
-      }
+      volverUrl={`/facturas/${factura.id}`}
     >
       <FormularioDevolucionCliente
         factura={{ ...factura, items: itemsEnriquecidos }}

@@ -15,7 +15,12 @@ export default async function NuevaCotizacion() {
   ]);
 
   return (
-    <PageDocument seccion="Ventas" titulo="Nueva Cotización" anchoCompleto={true}>
+    <PageDocument
+      seccion="Ventas"
+      titulo="Nueva Cotización"
+      anchoCompleto={true}
+      volverUrl="/cotizaciones"
+    >
       {catalogo.length === 0 ? (
         <div className="card p-6">
           <p className="text-sm text-slate-600">Primero da de alta un artículo en el inventario.</p>

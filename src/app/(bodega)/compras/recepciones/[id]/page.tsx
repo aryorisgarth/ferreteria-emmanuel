@@ -41,6 +41,7 @@ export default async function RecepcionDetallePage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo={`Recepción ${recepcion.numero}`}
+      volverUrl="/compras/recepciones"
       acciones={
         <div className="flex items-center gap-2">
           {!compra && (

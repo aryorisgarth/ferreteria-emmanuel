@@ -37,6 +37,7 @@ export default async function PedidosPage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo="Pedidos y Órdenes de Compra"
+      volverUrl="/compras"
       acciones={
         <div className="flex items-center gap-2">
           {faltantes > 0 && (

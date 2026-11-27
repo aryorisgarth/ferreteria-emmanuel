@@ -35,6 +35,7 @@ export default async function RecepcionesPage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo="Recepciones Físicas de Mercancía"
+      volverUrl="/compras"
       acciones={
         <Link className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/compras/recepciones/nueva">
           <Plus size={15} />

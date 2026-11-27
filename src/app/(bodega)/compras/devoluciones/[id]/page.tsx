@@ -40,16 +40,13 @@ export default async function DevolucionDetallePage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo={`Devolución ${devolucion.numero}`}
+      volverUrl="/compras/devoluciones"
       acciones={
         <div className="flex items-center gap-2">
           <BotonImprimir>
             <Printer size={15} />
             Imprimir Comprobante
           </BotonImprimir>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5 no-print" href="/compras/devoluciones">
-            <ArrowLeft size={15} />
-            Volver
-          </Link>
         </div>
       }
     >

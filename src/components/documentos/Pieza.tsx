@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { RENGLONES_POR_HOJA } from "@/lib/format";
 import type { EstadoSolicitud } from "@/lib/types";
+import { BotonVolver } from "@/components/ui/BotonVolver";
 
 export function PageDocument({
   seccion,
@@ -10,6 +11,7 @@ export function PageDocument({
   acciones,
   ancho = "libro",
   anchoCompleto = false,
+  volverUrl,
 }: {
   seccion: string;
   titulo: string;
@@ -18,6 +20,7 @@ export function PageDocument({
   acciones?: React.ReactNode;
   ancho?: "libro" | "pliego";
   anchoCompleto?: boolean;
+  volverUrl?: string;
 }) {
   return (
     <article
@@ -26,9 +29,12 @@ export function PageDocument({
       }`}
     >
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3 border-b border-slate-200 pb-3 print:hidden">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{seccion}</p>
-          <h1 className="mt-0.5 text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{titulo}</h1>
+        <div className="flex items-center gap-3">
+          {volverUrl && <BotonVolver rutaPorDefecto={volverUrl} />}
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{seccion}</p>
+            <h1 className="mt-0.5 text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{titulo}</h1>
+          </div>
         </div>
         {acciones ? <div className="no-print flex flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">{acciones}</div> : null}
       </header>

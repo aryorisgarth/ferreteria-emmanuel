@@ -36,12 +36,7 @@ export default async function NuevoPedidoPage({
       seccion="Entradas y Abastecimiento"
       titulo="Emitir Orden / Pedido de Compra"
       anchoCompleto={true}
-      acciones={
-        <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href="/compras/pedidos">
-          <ArrowLeft size={15} />
-          Volver a Pedidos
-        </Link>
-      }
+      volverUrl="/compras/pedidos"
     >
       {catalogo.length === 0 ? (
         <div className="card p-6">

@@ -45,6 +45,7 @@ export default async function PedidoDetallePage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo={`Pedido ${pedido.numero}`}
+      volverUrl="/compras/pedidos"
       acciones={
         <div className="flex items-center gap-2">
           {pedido.estado !== "CANCELADO" && pedido.estado !== "RECIBIDO" && (

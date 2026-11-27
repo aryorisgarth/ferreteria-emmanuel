@@ -46,6 +46,7 @@ export default async function CompraPage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo={`Compra ${compra.numero}`}
+      volverUrl="/compras"
       acciones={
         <div className="flex items-center gap-2">
           {!compra.anulada && (
@@ -61,10 +62,6 @@ export default async function CompraPage({
             <Printer size={15} />
             Imprimir Comprobante
           </BotonImprimir>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5 no-print" href="/compras">
-            <ArrowLeft size={15} />
-            Volver
-          </Link>
         </div>
       }
     >

@@ -17,6 +17,7 @@ export default async function NuevaSolicitud() {
       titulo="Nueva Solicitud y Entrega de Materiales"
       anchoCompleto={true}
       folio="SM"
+      volverUrl="/solicitudes"
     >
       <FormularioSolicitudDocumento catalogo={catalogo} oficinas={oficinas} fecha={fecha} />
     </PageDocument>

@@ -44,15 +44,12 @@ export default async function ProveedorDetallePage({
     <PageDocument
       seccion="Proveedores"
       titulo={`Perfil: ${proveedor.nombre}`}
+      volverUrl="/proveedores"
       acciones={
         <div className="flex items-center gap-2">
           <Link className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/compras/nueva">
             <Plus size={15} />
             Nueva Compra de Mercadería
-          </Link>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href="/proveedores">
-            <ArrowLeft size={15} />
-            Volver
           </Link>
         </div>
       }

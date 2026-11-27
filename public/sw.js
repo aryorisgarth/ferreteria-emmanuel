@@ -1,4 +1,4 @@
-const CACHE_NAME = "emmanuel-static-v1.1.4";
+const CACHE_NAME = "emmanuel-static-v1.1.5";
 
 // Solo recursos estáticos públicos inmutables (iconos, fuentes, logo)
 // NUNCA datos de clientes, productos, facturas, credenciales o Server Actions

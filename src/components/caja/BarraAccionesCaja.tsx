@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowDownRight, FileText, Lock, Unlock, Printer } from "lucide-react";
 import type { TurnoCaja } from "@/lib/types";
+import { BotonVolver } from "@/components/ui/BotonVolver";
 
 interface BarraAccionesCajaProps {
   turno: TurnoCaja | null;
@@ -43,6 +44,7 @@ export function BarraAccionesCaja({
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 rounded border border-slate-200 bg-white px-3 py-1.5 shadow-2xs">
       <div className="flex items-center gap-2">
+        <BotonVolver rutaPorDefecto="/inicio" className="h-8 w-8 !rounded-lg" />
         {turno ? (
           <span className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800">
             <span className="relative flex h-2 w-2">

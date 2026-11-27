@@ -12,7 +12,7 @@ export default async function NuevoArticulo({
   const sp = await searchParams;
   const categorias = await api.categorias();
   return (
-    <PageDocument seccion="Inventario" titulo="Nuevo artículo">
+    <PageDocument seccion="Inventario" titulo="Nuevo artículo" volverUrl="/inventario">
       <FormularioArticulo categorias={categorias} error={sp.error} />
     </PageDocument>
   );

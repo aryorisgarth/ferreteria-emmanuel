@@ -37,6 +37,7 @@ export default async function SolicitudPage({
       seccion="Expedientes de Bodega"
       titulo={`Solicitud ${solicitud.numero}`}
       folio="SM"
+      volverUrl="/solicitudes"
       acciones={
         <div className="flex items-center gap-2">
           <Link className="btn btn-azul h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href={`/solicitudes/${id}/imprimir`}>

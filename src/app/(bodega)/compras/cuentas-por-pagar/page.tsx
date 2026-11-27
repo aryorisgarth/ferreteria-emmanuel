@@ -39,6 +39,7 @@ export default async function CuentasPorPagarPage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo="Cuentas por Pagar a Proveedores"
+      volverUrl="/compras"
       acciones={
         <div className="flex items-center gap-2">
           <Link className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/compras/nueva">

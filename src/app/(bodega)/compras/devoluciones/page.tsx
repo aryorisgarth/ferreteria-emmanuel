@@ -37,6 +37,7 @@ export default async function DevolucionesPage({
     <PageDocument
       seccion="Entradas y Abastecimiento"
       titulo="Devoluciones a Proveedores"
+      volverUrl="/compras"
       acciones={
         <Link className="btn btn-amarillo h-10 px-4 text-xs font-bold gap-1.5 shadow-xs" href="/compras/devoluciones/nueva">
           <Plus size={15} />

@@ -51,6 +51,7 @@ export default async function FacturaDetalle({
     <PageDocument
       seccion="Facturación y Ventas"
       titulo={`Factura ${factura.numero}`}
+      volverUrl="/facturas"
       acciones={
         <div className="flex items-center gap-2">
           <BotonImprimir>
@@ -66,10 +67,6 @@ export default async function FacturaDetalle({
             <Share2 size={15} />
             WhatsApp
           </a>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5 no-print" href="/facturas">
-            <ArrowLeft size={15} />
-            Volver
-          </Link>
         </div>
       }
     >

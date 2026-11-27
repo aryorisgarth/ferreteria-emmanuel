@@ -5,7 +5,7 @@ export const metadata = { title: "Nuevo proveedor" };
 
 export default function NuevoProveedor() {
   return (
-    <PageDocument seccion="Proveedores" titulo="Nuevo proveedor">
+    <PageDocument seccion="Proveedores" titulo="Nuevo proveedor" volverUrl="/proveedores">
       <FormularioPersona tipo="proveedor" />
     </PageDocument>
   );

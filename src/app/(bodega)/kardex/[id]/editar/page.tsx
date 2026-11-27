@@ -30,12 +30,7 @@ export default async function DetalleMovimientoKardex({
       seccion="Auditoría e Inmutabilidad de Kárdex"
       titulo={`${mov.codigo} · ${mov.nombre}`}
       folio={mov.numeroReferencia || "KDX"}
-      acciones={
-        <Link className="btn btn-linea h-10 px-4 text-xs font-bold gap-1.5" href={`/kardex?producto=${mov.productoId}`}>
-          <ArrowLeft size={15} />
-          Volver al Kárdex
-        </Link>
-      }
+      volverUrl={`/kardex?producto=${mov.productoId}`}
     >
       {sp.aviso ? <Aviso tono="azul">{sp.aviso}</Aviso> : null}
 

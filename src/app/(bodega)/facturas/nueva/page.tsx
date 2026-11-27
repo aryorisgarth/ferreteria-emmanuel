@@ -20,12 +20,7 @@ export default async function NuevaFactura() {
       seccion="Ventas"
       titulo="Nueva Factura Directa"
       anchoCompleto={true}
-      acciones={
-        <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href="/facturas">
-          <ArrowLeft size={15} />
-          Volver a Facturas
-        </Link>
-      }
+      volverUrl="/facturas"
     >
       {catalogo.length === 0 ? (
         <div className="card p-6">

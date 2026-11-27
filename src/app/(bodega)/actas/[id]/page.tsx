@@ -27,16 +27,13 @@ export default async function ActaPage({
       titulo={`Acta de Entrega ${acta.numero}`}
       folio="AE"
       anchoCompleto={true}
+      volverUrl="/actas"
       acciones={
         <div className="flex items-center gap-2">
           <BotonImprimir>
             <Printer size={15} />
             Imprimir Acta Oficial
           </BotonImprimir>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5 no-print" href="/actas">
-            <ArrowLeft size={15} />
-            Volver a Actas
-          </Link>
         </div>
       }
     >

@@ -64,6 +64,7 @@ export default async function CotizacionDetalle({
     <PageDocument
       seccion="Cotización Comercial"
       titulo={`Cotización ${cotizacion.numero}`}
+      volverUrl="/cotizaciones"
       acciones={
         <div className="flex items-center gap-2">
           <BotonImprimir>
@@ -79,10 +80,6 @@ export default async function CotizacionDetalle({
             <Share2 size={15} />
             WhatsApp
           </a>
-          <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5 no-print" href="/cotizaciones">
-            <ArrowLeft size={15} />
-            Volver
-          </Link>
         </div>
       }
     >

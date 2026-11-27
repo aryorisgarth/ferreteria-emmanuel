@@ -31,12 +31,7 @@ export default async function NuevaRecepcionPage({
       seccion="Entradas y Abastecimiento"
       titulo="Recepción Física de Mercancía"
       anchoCompleto={true}
-      acciones={
-        <Link className="btn btn-linea h-10 px-3 text-xs font-bold gap-1.5" href="/compras/recepciones">
-          <ArrowLeft size={15} />
-          Volver a Recepciones
-        </Link>
-      }
+      volverUrl="/compras/recepciones"
     >
       {catalogo.length === 0 ? (
         <div className="card p-6">
