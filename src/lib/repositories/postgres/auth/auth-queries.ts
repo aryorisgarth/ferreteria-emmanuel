@@ -2,17 +2,12 @@ import type { UsuarioCuenta, RolUsuario } from "@/lib/auth";
 import type { SqlExecutor } from "../client";
 import { rolFromDb, rolToDb } from "./auth-roles";
 
-export async function dbObtenerUsuarios(
-  executor: SqlExecutor
-): Promise<UsuarioCuenta[]> {
+export async function dbObtenerUsuarios(executor: SqlExecutor): Promise<UsuarioCuenta[]> {
   const res = await executor.query(`
-    SELECT 
-      id, usuario, nombre, rol, clave as "passwordHash", activo,
-      correo, debe_cambiar_clave as "debeCambiarClave",
-      version_credencial as "versionCredencial",
-      creado_en as "creadoEn"
-    FROM usuarios_cuentas
-    ORDER BY usuario ASC
+    SELECT id, usuario, nombre, rol, clave as "passwordHash", activo, correo,
+           debe_cambiar_clave as "debeCambiarClave", version_credencial as "versionCredencial",
+           creado_en as "creadoEn"
+    FROM usuarios_cuentas ORDER BY usuario ASC
   `);
   return res.rows.map((r: any) => ({
     id: r.id,
@@ -37,20 +32,13 @@ export async function dbBuscarPorUsuario(
 ): Promise<UsuarioCuenta | null> {
   const cleanUser = nombreUsuario.trim().toLowerCase();
   const res = await executor.query(
-    `
-    SELECT 
-      id, usuario, nombre, rol, clave as "passwordHash", activo,
-      correo, debe_cambiar_clave as "debeCambiarClave",
-      version_credencial as "versionCredencial",
-      intentos_fallidos, bloqueado_hasta, ultimo_acceso,
-      creado_en as "creadoEn"
-    FROM usuarios_cuentas
-    WHERE LOWER(usuario) = $1 OR (correo IS NOT NULL AND LOWER(correo) = $1)
-    LIMIT 1
-  `,
+    `SELECT id, usuario, nombre, rol, clave as "passwordHash", activo, correo,
+            debe_cambiar_clave as "debeCambiarClave", version_credencial as "versionCredencial",
+            intentos_fallidos, bloqueado_hasta, ultimo_acceso, creado_en as "creadoEn"
+     FROM usuarios_cuentas
+     WHERE LOWER(usuario) = $1 OR (correo IS NOT NULL AND LOWER(correo) = $1) LIMIT 1`,
     [cleanUser]
   );
-
   if (res.rows.length === 0) return null;
   const r = res.rows[0];
   return {
@@ -70,24 +58,14 @@ export async function dbBuscarPorUsuario(
   };
 }
 
-export async function dbBuscarPorId(
-  executor: SqlExecutor,
-  id: string
-): Promise<UsuarioCuenta | null> {
+export async function dbBuscarPorId(executor: SqlExecutor, id: string): Promise<UsuarioCuenta | null> {
   const res = await executor.query(
-    `
-    SELECT 
-      id, usuario, nombre, rol, clave as "passwordHash", activo,
-      correo, debe_cambiar_clave as "debeCambiarClave",
-      version_credencial as "versionCredencial",
-      intentos_fallidos, bloqueado_hasta, ultimo_acceso,
-      creado_en as "creadoEn"
-    FROM usuarios_cuentas
-    WHERE id = $1
-  `,
+    `SELECT id, usuario, nombre, rol, clave as "passwordHash", activo, correo,
+            debe_cambiar_clave as "debeCambiarClave", version_credencial as "versionCredencial",
+            intentos_fallidos, bloqueado_hasta, ultimo_acceso, creado_en as "creadoEn"
+     FROM usuarios_cuentas WHERE id = $1 LIMIT 1`,
     [id]
   );
-
   if (res.rows.length === 0) return null;
   const r = res.rows[0];
   return {
@@ -107,10 +85,7 @@ export async function dbBuscarPorId(
   };
 }
 
-export async function dbObtenerTemaUsuario(
-  executor: SqlExecutor,
-  usuarioOId: string
-): Promise<string> {
+export async function dbObtenerTemaUsuario(executor: SqlExecutor, usuarioOId: string): Promise<string> {
   try {
     const clean = usuarioOId.trim().toLowerCase();
     const res = await executor.query(
@@ -134,7 +109,16 @@ export async function dbGuardarTemaUsuario(
       `UPDATE usuarios_cuentas SET tema = $2, actualizado_en = NOW() WHERE LOWER(usuario) = $1 OR id = $1`,
       [clean, tema]
     );
-    return (res.rowCount ?? 0) > 0;
+    if ((res.rowCount ?? 0) > 0) return true;
+
+    // UPSERT seguro si la fila no existía en esta base de datos
+    const up = await executor.query(
+      `INSERT INTO usuarios_cuentas (id, usuario, nombre, rol, clave, activo, tema, creado_en, actualizado_en)
+       VALUES ($1, $1, $1, 'admin', '$scrypt$theme_managed', true, $2, NOW(), NOW())
+       ON CONFLICT (usuario) DO UPDATE SET tema = EXCLUDED.tema, actualizado_en = NOW()`,
+      [clean, tema]
+    );
+    return (up.rowCount ?? 0) > 0;
   } catch (err) {
     console.warn("[Tema] Error al persistir tema en PostgreSQL:", err);
     return false;

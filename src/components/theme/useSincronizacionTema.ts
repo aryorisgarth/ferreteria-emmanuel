@@ -6,6 +6,7 @@ import type { TemaId } from "@/lib/theme";
 interface SincronizacionProps {
   usuario: string;
   temaGuardadoId: TemaId;
+  enVistaPrevia: boolean;
   onTemaRemoto: (nuevoTema: TemaId) => void;
 }
 
@@ -15,27 +16,43 @@ const INTERVALO_SONDEO_MS = 25000;
 export function useSincronizacionTema({
   usuario,
   temaGuardadoId,
+  enVistaPrevia,
   onTemaRemoto,
 }: SincronizacionProps) {
   const canalRef = useRef<BroadcastChannel | null>(null);
   const temaRef = useRef<TemaId>(temaGuardadoId);
   temaRef.current = temaGuardadoId;
 
+  const enVistaPreviaRef = useRef<boolean>(enVistaPrevia);
+  enVistaPreviaRef.current = enVistaPrevia;
+
+  const ultimoGuardadoLocalRef = useRef<number>(0);
+
   const consultarTemaServidor = useCallback(async () => {
     if (typeof document !== "undefined" && document.hidden) return;
+    // Si hay una previsualización activa en este dispositivo, nunca interrumpirla
+    if (enVistaPreviaRef.current) return;
+    // Evitar que respuestas en vuelo atrasadas sobrescriban una selección recién fijada
+    if (Date.now() - ultimoGuardadoLocalRef.current < 4000) return;
+
     try {
-      const res = await fetch("/api/usuario/tema", { cache: "no-store" });
+      const res = await fetch("/api/usuario/tema", {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
       if (!res.ok) return;
       const data = await res.json();
-      if (data?.tema && data.tema !== temaRef.current) {
+      if (
+        data?.tema &&
+        data.tema !== temaRef.current &&
+        !enVistaPreviaRef.current &&
+        Date.now() - ultimoGuardadoLocalRef.current >= 4000
+      ) {
         onTemaRemoto(data.tema as TemaId);
       }
-    } catch {
-      // Fallo silencioso de red sin interrumpir la experiencia
-    }
+    } catch {}
   }, [onTemaRemoto]);
 
-  // Canal de difusión multi-pestaña
   useEffect(() => {
     if (typeof window === "undefined" || !("BroadcastChannel" in window)) return;
 
@@ -44,7 +61,7 @@ export function useSincronizacionTema({
 
     canal.onmessage = (event) => {
       const { tipo, temaId, usuarioMsg } = event.data || {};
-      if (tipo === "CAMBIO_TEMA" && temaId) {
+      if (tipo === "CAMBIO_TEMA" && temaId && !enVistaPreviaRef.current) {
         if (!usuarioMsg || !usuario || usuarioMsg === usuario) {
           onTemaRemoto(temaId as TemaId);
         }
@@ -57,15 +74,13 @@ export function useSincronizacionTema({
     };
   }, [usuario, onTemaRemoto]);
 
-  // Sincronización pasiva servidor (inmediata al montar, focus, visibility y sondeo suave)
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Consulta inicial inmediata al cargar en cualquier dispositivo
     consultarTemaServidor();
 
     const onVisibilidad = () => {
-      if (!document.hidden) {
+      if (!document.hidden && !enVistaPreviaRef.current) {
         consultarTemaServidor();
       }
     };
@@ -83,15 +98,14 @@ export function useSincronizacionTema({
 
   const emitirTemaLocal = useCallback(
     (temaId: TemaId) => {
+      ultimoGuardadoLocalRef.current = Date.now();
       try {
         canalRef.current?.postMessage({
           tipo: "CAMBIO_TEMA",
           temaId,
           usuarioMsg: usuario,
         });
-      } catch {
-        // BroadcastChannel no disponible o error silencioso
-      }
+      } catch {}
     },
     [usuario]
   );

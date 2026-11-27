@@ -126,6 +126,19 @@ export class JsonAuthRepository implements IAuthRepository {
     });
     if (modificado) {
       guardarUsuariosJson(actualizados);
+    } else {
+      actualizados.push({
+        id: usuarioOId,
+        usuario: clean,
+        nombre: clean,
+        passwordHash: "",
+        rol: "ADMINISTRADOR",
+        activo: true,
+        tema,
+        creadoEn: "2026-01-01",
+      });
+      guardarUsuariosJson(actualizados);
+      modificado = true;
     }
     return modificado;
   }

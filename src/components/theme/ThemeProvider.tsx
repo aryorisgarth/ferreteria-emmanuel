@@ -5,7 +5,6 @@ import {
   useContext,
   useEffect,
   useState,
-  useTransition,
   useCallback,
   type ReactNode,
 } from "react";
@@ -26,29 +25,26 @@ interface ThemeContextType {
   temaPreview: TemaConfig | null;
   enVistaPrevia: boolean;
   previsualizarTema: (id: TemaId) => void;
-  guardarTema: (id: TemaId) => void;
+  guardarTema: (id: TemaId) => Promise<{ ok: boolean; error?: string }>;
   descartarVistaPrevia: () => void;
-  restaurarPredeterminado: () => void;
+  restaurarPredeterminado: () => Promise<{ ok: boolean; error?: string }>;
   usuarioActivo: string;
 }
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
-interface ThemeProviderProps {
-  children: ReactNode;
-  usuarioInicial?: string;
-  temaInicial?: TemaId;
-}
-
 export function ThemeProvider({
   children,
   usuarioInicial = "",
   temaInicial = TEMA_PREDETERMINADO,
-}: ThemeProviderProps) {
+}: {
+  children: ReactNode;
+  usuarioInicial?: string;
+  temaInicial?: TemaId;
+}) {
   const [usuario, setUsuario] = useState(usuarioInicial);
   const [temaGuardadoId, setTemaGuardadoId] = useState<TemaId>(temaInicial);
   const [temaPreviewId, setTemaPreviewId] = useState<TemaId | null>(null);
-  const [, startTransition] = useTransition();
 
   useEffect(() => {
     if (!usuario && typeof document !== "undefined") {
@@ -57,39 +53,36 @@ export function ThemeProvider({
     }
   }, [usuario]);
 
-  const manejarTemaRemoto = useCallback(
-    (nuevoTema: TemaId) => {
-      setTemaGuardadoId(nuevoTema);
-      try {
-        localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), nuevoTema);
-        document.cookie = `fe_tema=${encodeURIComponent(nuevoTema)}; path=/; max-age=31536000; SameSite=Lax`;
-      } catch {}
-      if (!temaPreviewId) aplicarTemaDocumento(resolverTema(nuevoTema));
-    },
-    [usuario, temaPreviewId]
-  );
+  const manejarTemaRemoto = useCallback((nuevoTema: TemaId) => {
+    setTemaGuardadoId(nuevoTema);
+    try {
+      localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), nuevoTema);
+      document.cookie = `fe_tema=${encodeURIComponent(nuevoTema)}; path=/; max-age=31536000; SameSite=Lax`;
+    } catch {}
+    if (!temaPreviewId) aplicarTemaDocumento(resolverTema(nuevoTema));
+  }, [usuario, temaPreviewId]);
 
   const { emitirTemaLocal } = useSincronizacionTema({
     usuario,
     temaGuardadoId,
+    enVistaPrevia: Boolean(temaPreviewId),
     onTemaRemoto: manejarTemaRemoto,
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const storageKey = obtenerClaveAlmacenamientoTema(usuario);
-      const guardado = localStorage.getItem(storageKey);
+      const guardado = localStorage.getItem(obtenerClaveAlmacenamientoTema(usuario));
       if (guardado && guardado in TEMAS_SISTEMA) {
         setTemaGuardadoId(guardado as TemaId);
-        aplicarTemaDocumento(TEMAS_SISTEMA[guardado as TemaId]);
-      } else {
+        if (!temaPreviewId) aplicarTemaDocumento(TEMAS_SISTEMA[guardado as TemaId]);
+      } else if (!temaPreviewId) {
         aplicarTemaDocumento(resolverTema(temaGuardadoId));
       }
     } catch {
-      aplicarTemaDocumento(resolverTema(temaGuardadoId));
+      if (!temaPreviewId) aplicarTemaDocumento(resolverTema(temaGuardadoId));
     }
-  }, [usuario, temaGuardadoId]);
+  }, [usuario, temaGuardadoId, temaPreviewId]);
 
   const previsualizarTema = (id: TemaId) => {
     setTemaPreviewId(id);
@@ -101,36 +94,38 @@ export function ThemeProvider({
     aplicarTemaDocumento(resolverTema(temaGuardadoId));
   };
 
-  const guardarTema = (id: TemaId) => {
-    setTemaGuardadoId(id);
-    setTemaPreviewId(null);
-    aplicarTemaDocumento(resolverTema(id));
-
+  const guardarTema = async (id: TemaId): Promise<{ ok: boolean; error?: string }> => {
     try {
-      localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), id);
-    } catch {}
-
-    emitirTemaLocal(id);
-    startTransition(async () => {
-      await fijarTemaAction(id);
-    });
+      const res = await fijarTemaAction(id);
+      if (!res.ok) {
+        aplicarTemaDocumento(resolverTema(temaGuardadoId));
+        return { ok: false, error: res.error || "No se pudo guardar la preferencia en PostgreSQL." };
+      }
+      setTemaGuardadoId(id);
+      setTemaPreviewId(null);
+      aplicarTemaDocumento(resolverTema(id));
+      try {
+        localStorage.setItem(obtenerClaveAlmacenamientoTema(usuario), id);
+        document.cookie = `fe_tema=${encodeURIComponent(id)}; path=/; max-age=31536000; SameSite=Lax`;
+      } catch {}
+      emitirTemaLocal(id);
+      return { ok: true };
+    } catch (err: any) {
+      aplicarTemaDocumento(resolverTema(temaGuardadoId));
+      return { ok: false, error: err?.message || "Error al conectar con el servidor." };
+    }
   };
-
-  const restaurarPredeterminado = () => guardarTema(TEMA_PREDETERMINADO);
-
-  const temaActual = resolverTema(temaPreviewId || temaGuardadoId);
-  const temaPreview = temaPreviewId ? resolverTema(temaPreviewId) : null;
 
   return (
     <ThemeContext.Provider
       value={{
-        temaActual,
-        temaPreview,
+        temaActual: resolverTema(temaPreviewId || temaGuardadoId),
+        temaPreview: temaPreviewId ? resolverTema(temaPreviewId) : null,
         enVistaPrevia: Boolean(temaPreviewId),
         previsualizarTema,
         guardarTema,
         descartarVistaPrevia,
-        restaurarPredeterminado,
+        restaurarPredeterminado: () => guardarTema(TEMA_PREDETERMINADO),
         usuarioActivo: usuario || "general",
       }}
     >
@@ -141,8 +136,6 @@ export function ThemeProvider({
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
-  if (!ctx) {
-    throw new Error("useTheme debe ser utilizado dentro de un ThemeProvider");
-  }
+  if (!ctx) throw new Error("useTheme debe ser utilizado dentro de un ThemeProvider");
   return ctx;
 }

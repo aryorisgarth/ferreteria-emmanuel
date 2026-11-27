@@ -34,21 +34,32 @@ export function SelectorTema({ usuarioNombre }: SelectorTemaProps) {
     previsualizarTema(id);
   };
 
-  const handleGuardar = (id: TemaId) => {
-    guardarTema(id);
-    const nom = LISTA_TEMAS.find((t) => t.id === id)?.nombre;
-    toast.exito(
-      `Tema "${nom}" fijado para ${usuarioDisplay}.`,
-      "Apariencia Guardada"
-    );
+  const handleGuardar = async (id: TemaId) => {
+    const res = await guardarTema(id);
+    if (res.ok) {
+      const nom = LISTA_TEMAS.find((t) => t.id === id)?.nombre;
+      toast.exito(
+        `Tema "${nom}" guardado exitosamente para ${usuarioDisplay}.`,
+        "Apariencia Guardada"
+      );
+    } else {
+      toast.error(
+        res.error || "No se pudo guardar el tema en la base de datos.",
+        "Error al Guardar"
+      );
+    }
   };
 
-  const handleRestaurar = () => {
-    restaurarPredeterminado();
-    toast.aviso(
-      "Se ha restablecido la apariencia institucional predeterminada.",
-      "Tema Restablecido"
-    );
+  const handleRestaurar = async () => {
+    const res = await restaurarPredeterminado();
+    if (res.ok) {
+      toast.aviso(
+        "Se ha restablecido la apariencia institucional predeterminada.",
+        "Tema Restablecido"
+      );
+    } else {
+      toast.error(res.error || "No se pudo restablecer el tema.", "Error");
+    }
   };
 
   const handleDescartar = () => {
@@ -78,6 +89,7 @@ export function SelectorTema({ usuarioNombre }: SelectorTemaProps) {
         onSeleccionar={handleSeleccionar}
         onGuardar={handleGuardar}
         onRestaurar={handleRestaurar}
+        onCancelarPreview={handleDescartar}
       />
 
       <TemaShowcase temaActual={temaActual} />
