@@ -13,7 +13,8 @@ const ITEMS = [
 ] as const;
 
 export function BottomNav() {
-  const pathname = usePathname();
+  const rawPathname = usePathname();
+  const pathname = rawPathname || "";
 
   return (
     <nav

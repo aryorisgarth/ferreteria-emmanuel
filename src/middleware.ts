@@ -15,7 +15,8 @@ export async function middleware(request: NextRequest) {
   const esRutaPublica =
     pathname === "/" ||
     pathname === "/recuperar" ||
-    pathname === "/manifest.webmanifest";
+    pathname === "/manifest.webmanifest" ||
+    pathname === "/sw.js";
 
   // Verificar la firma criptográfica y expiración del token HMAC
   const sesion = await verificarTokenSesion(token);
