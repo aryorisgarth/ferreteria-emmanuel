@@ -3,7 +3,6 @@
 import { useActionState, useState } from "react";
 import { AlertCircle, ChevronRight, Eye, EyeOff, Lock, User } from "lucide-react";
 import { loginAction } from "@/app/actions";
-import { BotonFullscreen } from "@/components/pwa/BotonFullscreen";
 
 interface Props {
   volverUrl?: string;
@@ -28,21 +27,18 @@ export function PanelFormularioLogin({
 
   return (
     <div className="relative flex flex-col justify-between w-full h-full bg-white border-l border-slate-200 text-slate-800 shadow-2xl overflow-y-auto">
-      {/* Botón superior minimalista: pantalla completa + flecha para ocultar */}
+      {/* Botón superior minimalista: solo flecha para ocultar */}
       <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-100">
         <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Acceso al Sistema</span>
-        <div className="flex items-center gap-2">
-          <BotonFullscreen className="!bg-slate-100 hover:!bg-slate-200 !text-slate-600 hover:!text-slate-900 !border-slate-200 !p-1.5 !rounded-lg" />
-          <button
-            type="button"
-            onClick={onOcultar}
-            title="Ocultar formulario y ver escena completa"
-            aria-label="Ocultar formulario"
-            className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
-          >
-            <ChevronRight size={18} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onOcultar}
+          title="Ocultar formulario y ver escena completa"
+          aria-label="Ocultar formulario"
+          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
+        >
+          <ChevronRight size={18} />
+        </button>
       </div>
 
       {/* Formulario centrado vertical y horizontalmente con max-w-[460px] */}
