@@ -135,11 +135,10 @@ export default async function TotalDelDia({
         <div className="flex items-center gap-2">
           <Link
             href={`/total-del-dia?fecha=${fechaActual}`}
-            className={`px-3 py-1.5 text-xs font-bold rounded-[5px] border transition ${
-              fecha === fechaActual
-                ? "border-amber-400 bg-amber-50 text-amber-900"
-                : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
-            }`}
+            className={`px-3 py-1.5 text-xs font-bold rounded-[5px] border transition ${fecha === fechaActual
+              ? "border-amber-400 bg-amber-50 text-amber-900"
+              : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+              }`}
           >
             Hoy
           </Link>

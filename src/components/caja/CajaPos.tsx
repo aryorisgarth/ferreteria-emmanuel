@@ -9,7 +9,9 @@ import { TablaArticulosVenta } from "./TablaArticulosVenta";
 import { TicketVenta } from "./TicketVenta";
 import { FormCobroHidden } from "./FormCobroHidden";
 import { ModalesCajaContainer } from "./ModalesCajaContainer";
+import { ModalTicketsEspera } from "./ModalTicketsEspera";
 import { useCarritoPos } from "./useCarritoPos";
+import { useTicketsEnEspera } from "./useTicketsEnEspera";
 import { useModalesCaja } from "./useModalesCaja";
 import { useAtajosPos } from "./useAtajosPos";
 import { reproducirBeep } from "./utilidades-impresion";
@@ -28,6 +30,8 @@ export function CajaPos({ catalogo, clientes, turno, config, ticketExitoso, coti
 
   const factorImpuesto = (config?.impuesto?.porcentaje ?? 15) / 100;
   const { carrito, setCarrito, subtotal, iva, total, cotizacionActiva, agregar, cambiarCantidad, fijarCantidad, eliminar, importarCotizacion } = useCarritoPos(factorImpuesto);
+  const { tickets: ticketsEspera, pausarTicket, retomarTicket, descartarTicket } = useTicketsEnEspera();
+  const [modalTicketsEspera, setModalTicketsEspera] = useState(false);
   const m = useModalesCaja(ticketExitoso);
 
   const categorias = useMemo(() => {
@@ -80,6 +84,13 @@ export function CajaPos({ catalogo, clientes, turno, config, ticketExitoso, coti
         onAbrirMovimiento={() => m.setModalMovimiento(true)}
         onAbrirCierre={m.abrirCierre}
         onAbrirTurno={() => m.setModalTurno(true)}
+        onPausarVenta={() => {
+          if (carrito.length === 0) return toast.aviso("Agrega artículos para pausar.", "Ticket Vacío");
+          if (pausarTicket(carrito, total)) { setCarrito([]); toast.exito("Ticket en espera."); }
+        }}
+        onAbrirTicketsEspera={() => setModalTicketsEspera(true)}
+        ticketsEsperaCount={ticketsEspera.length}
+        hayItemsCarrito={carrito.length > 0}
       />
 
       <div className="grid gap-3 lg:grid-cols-[1.35fr_1.05fr] xl:grid-cols-[1.4fr_1fr] w-full items-start">
@@ -121,6 +132,13 @@ export function CajaPos({ catalogo, clientes, turno, config, ticketExitoso, coti
         onCambiarCliente={(nom, id) => { setCliente(nom); setClienteId(id); }} onConfirmarCobro={confirmarCobro} enviando={enviando}
         ticketExitoso={ticketExitoso} config={config} onSiguienteVenta={() => { setCarrito([]); setCliente("Público general"); setClienteId(""); m.setModalTicket(false); }}
         turno={turno} efectivoEsperado={efectivoEsperado} difArqueo={difArqueo}
+      />
+
+      <ModalTicketsEspera
+        abierto={modalTicketsEspera} alCerrar={() => setModalTicketsEspera(false)} tickets={ticketsEspera}
+        simboloMoneda={config?.moneda?.simbolo || "C$"}
+        onRetomar={(id) => { const r = retomarTicket(id); if (r) { setCarrito(r); toast.exito("Ticket retomado."); } }}
+        onDescartar={descartarTicket}
       />
     </div>
   );

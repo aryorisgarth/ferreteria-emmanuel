@@ -12,12 +12,33 @@ export function reproducirBeep(tipo: "ok" | "error" = "ok") {
     osc.connect(gain);
     gain.connect(ctx.destination);
     const freq = tipo === "ok" ? 1600 : 280;
-    const dur = tipo === "ok" ? 0.09 : 0.18;
+    const dur = tipo === "ok" ? 0.08 : 0.16;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     gain.gain.setValueAtTime(tipo === "ok" ? 0.12 : 0.18, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
     osc.start();
     osc.stop(ctx.currentTime + dur);
+  } catch { }
+}
+
+export function reproducirChimeExito() {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    [523.25, 659.25].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const st = ctx.currentTime + idx * 0.09;
+      osc.frequency.setValueAtTime(freq, st);
+      gain.gain.setValueAtTime(0.12, st);
+      gain.gain.exponentialRampToValueAtTime(0.001, st + 0.2);
+      osc.start(st);
+      osc.stop(st + 0.2);
+    });
   } catch {}
 }
 
@@ -28,19 +49,15 @@ export function imprimirTicketTermico(facturaObj: any, config: ConfiguracionSist
   const porcentajeImpuesto = config?.impuesto?.porcentaje ?? 15;
   const nombreImpuesto = config?.impuesto?.nombre || "I.V.A.";
 
-  // Detección de ancho según preferencia local (58mm u 80mm)
   let anchoPapel = "80mm";
   let tamFuente = "12px";
   if (typeof window !== "undefined") {
     try {
       const prefs = JSON.parse(localStorage.getItem("ferreteria_hardware_prefs") || "{}");
       if (prefs.anchoPapel === "58mm" || prefs.tipoImpresora === "termica-58") {
-        anchoPapel = "58mm";
-        tamFuente = "10px";
+        anchoPapel = "58mm"; tamFuente = "10px";
       }
-    } catch {
-      // Valor por defecto 80mm
-    }
+    } catch {}
   }
 
   const ventana = window.open("", "_blank", "width=380,height=650");
@@ -106,27 +123,20 @@ export function compartirWhatsApp(facturaObj: any, config: ConfiguracionSistema,
   let numLimpio = tel.replace(/\D/g, "");
   if (numLimpio.length === 8) numLimpio = `505${numLimpio}`;
 
-  const lineasTicket = (items || [])
-    .map((i: any) => `• ${numero(i.cantidad)}x ${i.nombre}: ${simboloMoneda} ${numero(i.importe)}`)
-    .join("\n");
-
-  const mensajeWhatsApp =
-    `🏪 *${config.empresa.nombre.toUpperCase()}*\n` +
-    `📋 *Comprobante de Venta:* ${factura?.numero || ""}\n` +
-    `👤 *Cliente:* ${factura?.cliente || "Público general"}\n` +
-    `💳 *Forma de Pago:* ${factura?.formaPago || "EFECTIVO"}\n` +
-    `--------------------------------\n` +
-    `*DETALLE DE MATERIALES:*\n` +
-    `${lineasTicket}\n` +
-    `--------------------------------\n` +
-    `💰 *TOTAL PAGADO:* ${simboloMoneda} ${numero(tot)}\n` +
-    (facturaObj.vuelto > 0 ? `💵 *Cambio Entregado:* ${simboloMoneda} ${numero(facturaObj.vuelto)}\n` : "") +
-    `--------------------------------\n` +
-    `_${config.empresa.pieFactura || "¡Gracias por su compra!"}_`;
-
-  const urlWa = numLimpio
-    ? `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensajeWhatsApp)}`
-    : `https://wa.me/?text=${encodeURIComponent(mensajeWhatsApp)}`;
-
+  const lineasTicket = (items || []).map((i: any) => `• ${numero(i.cantidad)}x ${i.nombre}: ${simboloMoneda} ${numero(i.importe)}`).join("\n");
+  const mensajeWhatsApp = [
+    `🏪 *${config.empresa.nombre.toUpperCase()}*`,
+    `📋 *Comprobante de Venta:* ${factura?.numero || ""}`,
+    `👤 *Cliente:* ${factura?.cliente || "Público general"}`,
+    `💳 *Forma de Pago:* ${factura?.formaPago || "EFECTIVO"}`,
+    "--------------------------------",
+    `*DETALLE DE MATERIALES:*\n${lineasTicket}`,
+    "--------------------------------",
+    `💰 *TOTAL PAGADO:* ${simboloMoneda} ${numero(tot)}`,
+    facturaObj.vuelto > 0 ? `💵 *Cambio Entregado:* ${simboloMoneda} ${numero(facturaObj.vuelto)}` : "",
+    "--------------------------------",
+    `_${config.empresa.pieFactura || "¡Gracias por su compra!"}_`,
+  ].filter(Boolean).join("\n");
+  const urlWa = numLimpio ? `https://wa.me/${numLimpio}?text=${encodeURIComponent(mensajeWhatsApp)}` : `https://wa.me/?text=${encodeURIComponent(mensajeWhatsApp)}`;
   window.open(urlWa, "_blank");
 }

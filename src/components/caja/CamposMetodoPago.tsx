@@ -132,6 +132,17 @@ export function CamposMetodoPago({
           </div>
         </div>
       )}
+
+      {pago === "CREDITO" && (
+        <div className="p-3 bg-amber-50/90 rounded-2xl border border-amber-200/80 text-xs text-amber-900 space-y-1">
+          <p className="font-bold flex items-center gap-1.5 text-amber-950">
+            <span>⚠️</span> Venta a Crédito / Fiado
+          </p>
+          <p className="text-[11px] text-amber-800">
+            Se registrará como saldo en la cuenta corriente del cliente. Requiere cliente registrado (no aplica a Público General).
+          </p>
+        </div>
+      )}
     </div>
   );
 }

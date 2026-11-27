@@ -66,6 +66,7 @@ export function ModalCobro({
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (pago === "CREDITO" && !clienteIdSeleccionado) return;
     onConfirmarCobro({
       pago,
       efectivoRecibido: typeof efectivoRecibido === "number" ? efectivoRecibido : undefined,
@@ -76,6 +77,8 @@ export function ModalCobro({
       notasVenta: notas,
     });
   };
+
+  const creditoBloqueado = pago === "CREDITO" && !clienteIdSeleccionado;
 
   return (
     <Modal
@@ -108,21 +111,17 @@ export function ModalCobro({
         </div>
 
         <CamposMetodoPago
-          pago={pago}
-          onCambiarPago={setPago}
-          efectivoRecibido={efectivoRecibido}
-          onCambiarEfectivoRecibido={setEfectivoRecibido}
-          bancoDestino={bancoDestino}
-          onCambiarBancoDestino={setBancoDestino}
-          referenciaBancaria={referenciaBancaria}
-          onCambiarReferenciaBancaria={setReferenciaBancaria}
-          montoEfectivoMixto={montoEfectivoMixto}
-          onCambiarMontoEfectivoMixto={handleEfectivoMixto}
-          montoTransferenciaMixto={montoTransferenciaMixto}
-          onCambiarMontoTransferenciaMixto={setMontoTransferenciaMixto}
-          cambio={cambio}
-          simboloMoneda={simboloMoneda}
+          pago={pago} onCambiarPago={setPago} efectivoRecibido={efectivoRecibido} onCambiarEfectivoRecibido={setEfectivoRecibido}
+          bancoDestino={bancoDestino} onCambiarBancoDestino={setBancoDestino} referenciaBancaria={referenciaBancaria}
+          onCambiarReferenciaBancaria={setReferenciaBancaria} montoEfectivoMixto={montoEfectivoMixto} onCambiarMontoEfectivoMixto={handleEfectivoMixto}
+          montoTransferenciaMixto={montoTransferenciaMixto} onCambiarMontoTransferenciaMixto={setMontoTransferenciaMixto} cambio={cambio} simboloMoneda={simboloMoneda}
         />
+
+        {creditoBloqueado && (
+          <p className="text-[11px] font-bold text-amber-800 bg-amber-50 p-2 rounded-xl border border-amber-200 text-center">
+            ⚠️ Para vender a crédito debe seleccionar un cliente registrado arriba.
+          </p>
+        )}
 
         <div className="flex items-center justify-between pt-3 border-t border-slate-100">
           <button type="button" onClick={alCerrar} className="btn btn-linea h-9 px-4 text-xs font-bold">
@@ -130,7 +129,7 @@ export function ModalCobro({
           </button>
           <button
             type="submit"
-            disabled={enviando}
+            disabled={enviando || creditoBloqueado}
             className="btn btn-amarillo h-9 px-5 text-xs font-black uppercase tracking-wider gap-1.5 shadow-sm disabled:opacity-40"
           >
             <span>Confirmar y Facturar</span>

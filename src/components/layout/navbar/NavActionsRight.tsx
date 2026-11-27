@@ -27,6 +27,18 @@ export function NavActionsRight({
 }: Props) {
   return (
     <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+      {/* Indicador Cloud Pulse en Tiempo Real */}
+      <div
+        className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50/90 border border-emerald-200/80 text-[10px] font-bold text-emerald-800 shadow-2xs select-none"
+        title="Neon PostgreSQL Cloud conectado y sincronizado en tiempo real"
+      >
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        </span>
+        <span className="font-mono">Neon Cloud</span>
+      </div>
+
       <NavSearchBar onAbrirModal={onAbrirBusqueda} />
       <Link
         href="/caja"

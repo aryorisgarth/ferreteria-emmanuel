@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect } from "react";
 import { Printer, Share2, CheckCircle2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { dinero, numero } from "@/lib/format";
+import { reproducirChimeExito } from "./utilidades-impresion";
 
 interface ModalTicketExitosoProps {
   abierto: boolean;
@@ -27,6 +29,12 @@ export function ModalTicketExitoso({
   onCambiarTelefono,
   onSiguienteVenta,
 }: ModalTicketExitosoProps) {
+  useEffect(() => {
+    if (abierto) {
+      reproducirChimeExito();
+    }
+  }, [abierto]);
+
   if (!ticketData) return null;
 
   const { factura, items, total, vuelto } = ticketData;

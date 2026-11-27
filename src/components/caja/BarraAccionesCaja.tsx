@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDownRight, FileText, Lock, Unlock, Printer } from "lucide-react";
+import { ArrowDownRight, FileText, Lock, Unlock, Printer, PauseCircle, Clock } from "lucide-react";
 import type { TurnoCaja } from "@/lib/types";
 import { BotonVolver } from "@/components/ui/BotonVolver";
 
@@ -11,6 +11,10 @@ interface BarraAccionesCajaProps {
   onAbrirMovimiento: () => void;
   onAbrirCierre: () => void;
   onAbrirTurno: () => void;
+  onPausarVenta?: () => void;
+  onAbrirTicketsEspera?: () => void;
+  ticketsEsperaCount?: number;
+  hayItemsCarrito?: boolean;
 }
 
 export function BarraAccionesCaja({
@@ -19,15 +23,16 @@ export function BarraAccionesCaja({
   onAbrirMovimiento,
   onAbrirCierre,
   onAbrirTurno,
+  onPausarVenta,
+  onAbrirTicketsEspera,
+  ticketsEsperaCount = 0,
+  hayItemsCarrito = false,
 }: BarraAccionesCajaProps) {
   const [anchoTermico, setAnchoTermico] = useState<"80mm" | "58mm">(() => {
     if (typeof window === "undefined") return "80mm";
     try {
-      const p = JSON.parse(localStorage.getItem("ferreteria_hardware_prefs") || "{}");
-      return p.anchoPapel === "58mm" ? "58mm" : "80mm";
-    } catch {
-      return "80mm";
-    }
+      return JSON.parse(localStorage.getItem("ferreteria_hardware_prefs") || "{}").anchoPapel === "58mm" ? "58mm" : "80mm";
+    } catch { return "80mm"; }
   });
 
   const cambiarAncho = () => {
@@ -38,7 +43,7 @@ export function BarraAccionesCaja({
       p.anchoPapel = nuevo;
       p.tipoImpresora = nuevo === "58mm" ? "termica-58" : "termica-80";
       localStorage.setItem("ferreteria_hardware_prefs", JSON.stringify(p));
-    } catch {}
+    } catch { }
   };
 
   return (
@@ -63,6 +68,28 @@ export function BarraAccionesCaja({
       </div>
 
       <div className="flex items-center gap-1.5">
+        {hayItemsCarrito && onPausarVenta && (
+          <button
+            type="button"
+            onClick={onPausarVenta}
+            className="btn btn-linea h-7 text-xs px-2 font-bold gap-1 border-amber-300 text-amber-900 bg-amber-50 hover:bg-amber-100"
+            title="Pausar ticket actual y guardarlo en espera"
+          >
+            <PauseCircle size={12} className="text-amber-600" />
+            <span className="hidden sm:inline">Pausar</span>
+          </button>
+        )}
+        {ticketsEsperaCount > 0 && onAbrirTicketsEspera && (
+          <button
+            type="button"
+            onClick={onAbrirTicketsEspera}
+            className="btn btn-linea h-7 text-xs px-2 font-bold gap-1 border-orange-400 text-orange-900 bg-orange-50 hover:bg-orange-100 animate-pulse"
+            title="Ver tickets en espera"
+          >
+            <Clock size={12} className="text-orange-600" />
+            <span>Espera ({ticketsEsperaCount})</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={cambiarAncho}
@@ -79,7 +106,7 @@ export function BarraAccionesCaja({
           title="Cargar cotización autorizada (F7)"
         >
           <FileText size={12} className="text-amber-700" />
-          <span>Cargar Cotización [F7]</span>
+          <span>Cotización [F7]</span>
         </button>
 
         {turno ? (
@@ -100,7 +127,7 @@ export function BarraAccionesCaja({
               title="Cierre de turno y arqueo de gaveta"
             >
               <Lock size={12} />
-              <span>Arqueo / Cierre</span>
+              <span>Cierre</span>
             </button>
           </>
         ) : (

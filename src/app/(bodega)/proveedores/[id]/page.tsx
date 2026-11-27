@@ -68,11 +68,10 @@ export default async function ProveedorDetallePage({
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-slate-900">{proveedor.nombre}</h2>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                    proveedor.activo !== false
-                      ? "bg-emerald-100 text-emerald-800"
-                      : "bg-slate-200 text-slate-700"
-                  }`}
+                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${proveedor.activo !== false
+                    ? "bg-emerald-100 text-emerald-800"
+                    : "bg-slate-200 text-slate-700"
+                    }`}
                 >
                   {proveedor.activo !== false ? "Activo" : "Inactivo"}
                 </span>
@@ -120,11 +119,10 @@ export default async function ProveedorDetallePage({
               <input type="hidden" name="activo" value={proveedor.activo !== false ? "false" : "true"} />
               <button
                 type="submit"
-                className={`btn btn-linea h-10 px-3 text-xs font-bold ${
-                  proveedor.activo !== false
-                    ? "text-slate-600 hover:text-rose-700"
-                    : "text-emerald-700 border-emerald-300 hover:bg-emerald-50"
-                }`}
+                className={`btn btn-linea h-10 px-3 text-xs font-bold ${proveedor.activo !== false
+                  ? "text-slate-600 hover:text-rose-700"
+                  : "text-emerald-700 border-emerald-300 hover:bg-emerald-50"
+                  }`}
               >
                 {proveedor.activo !== false ? "Desactivar" : "Reactivar"}
               </button>
@@ -216,9 +214,8 @@ export default async function ProveedorDetallePage({
                     <td className="py-2.5 px-4 font-mono">{item.compra.items.length} artículos</td>
                     <td className="py-2.5 px-4 text-center">
                       <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          item.compra.anulada ? "bg-rose-100 text-rose-800" : "bg-emerald-100 text-emerald-800"
-                        }`}
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${item.compra.anulada ? "bg-rose-100 text-rose-800" : "bg-emerald-100 text-emerald-800"
+                          }`}
                       >
                         {item.compra.anulada ? "Anulada" : "Aplicada a Stock"}
                       </span>
