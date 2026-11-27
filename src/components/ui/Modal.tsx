@@ -57,20 +57,25 @@ export function Modal({
   }[anchoMax];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
-      {/* Backdrop oscuro con desenfoque suave */}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6 overflow-hidden">
+      {/* Backdrop oscuro con desenfoque suave tipo iOS */}
       <div
         className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs transition-opacity"
         onClick={alCerrar}
       />
 
-      {/* Contenedor del Modal con altura controlada y SIN doble scroll externo */}
+      {/* Contenedor: Bottom Sheet en móvil, Modal centrado en Desktop/Tablet */}
       <div
-        className={`relative z-10 flex flex-col w-full ${maxWidthClass} max-h-[92vh] rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl transition-all overflow-hidden`}
+        className={`relative z-10 flex flex-col w-full ${maxWidthClass} max-h-[92dvh] rounded-t-[1.75rem] sm:rounded-2xl border-t sm:border border-slate-200/90 bg-white text-slate-900 shadow-2xl transition-all overflow-hidden`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Indicador de arrastre táctil (iOS Drag Handle) solo en móvil */}
+        <div className="sm:hidden pt-2.5 pb-1 flex justify-center bg-slate-50/90 shrink-0">
+          <div className="w-10 h-1 rounded-full bg-slate-300" />
+        </div>
+
         {/* Cabecera fija que nunca se oculta */}
-        <div className="shrink-0 flex items-center justify-between border-b border-slate-100 bg-slate-50/90 px-6 py-4">
+        <div className="shrink-0 flex items-center justify-between border-b border-slate-100 bg-slate-50/90 px-5 sm:px-6 py-3.5 sm:py-4">
           <div className="pr-4">
             <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight leading-snug">
               {titulo}
@@ -84,8 +89,8 @@ export function Modal({
           <button
             type="button"
             onClick={alCerrar}
-            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition"
-            title="Cerrar modal (Esc)"
+            className="shrink-0 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 sm:bg-transparent text-slate-400 hover:bg-slate-200/80 hover:text-slate-700 transition"
+            title="Cerrar (Esc)"
           >
             <X size={18} />
           </button>

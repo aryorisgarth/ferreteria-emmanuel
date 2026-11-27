@@ -39,7 +39,8 @@ export function CamposMetodoPago({
 }: CamposMetodoPagoProps) {
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+      {/* Selector Segmentado tipo iOS (Segmented Control) */}
+      <div className="bg-slate-100/90 p-1 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-1 border border-slate-200/60">
         {[
           { id: "EFECTIVO", label: "Efectivo", icon: DollarSign },
           { id: "TRANSFERENCIA", label: "Transferencia", icon: CreditCard },
@@ -53,11 +54,16 @@ export function CamposMetodoPago({
               key={m.id}
               type="button"
               onClick={() => onCambiarPago(m.id as FormaPagoPOS)}
-              className={`h-9 px-2 rounded border text-xs font-bold flex items-center justify-center gap-1.5 transition ${
-                activo ? "bg-slate-900 text-white border-slate-900 shadow-2xs" : "bg-white text-slate-700 hover:bg-slate-100 border-slate-300"
+              className={`h-9 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all duration-150 active:scale-[0.97] cursor-pointer ${
+                activo
+                  ? "bg-white text-slate-900 shadow-xs border border-slate-200/50"
+                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
               }`}
             >
-              <Icon size={13} className={activo ? "text-amber-400" : "text-slate-400"} />
+              <Icon
+                size={14}
+                className={activo ? "text-amber-500" : "text-slate-400"}
+              />
               <span>{m.label}</span>
             </button>
           );
@@ -65,14 +71,14 @@ export function CamposMetodoPago({
       </div>
 
       {pago === "EFECTIVO" && (
-        <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 grid grid-cols-2 gap-3 text-xs">
+        <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200/80 grid grid-cols-2 gap-3 text-xs">
           <div>
             <label className="block font-bold text-slate-700 mb-1">Efectivo Recibido</label>
-            <input type="number" step="any" min={0} required value={efectivoRecibido} onChange={(e) => onCambiarEfectivoRecibido(parseFloat(e.target.value) || "")} placeholder="C$ 0.00" className="h-8 w-full rounded border border-slate-300 bg-white px-2.5 font-mono font-bold text-slate-900 outline-none focus:border-brand-yellow" autoFocus />
+            <input type="number" step="any" min={0} required value={efectivoRecibido} onChange={(e) => onCambiarEfectivoRecibido(parseFloat(e.target.value) || "")} placeholder="C$ 0.00" className="h-9 w-full rounded-xl border border-slate-300 bg-white px-2.5 font-mono font-bold text-slate-900 outline-none focus:border-amber-500" autoFocus />
           </div>
           <div>
             <span className="block font-bold text-slate-700 mb-1">Cambio / Vuelto</span>
-            <p className="h-8 flex items-center px-2.5 rounded bg-emerald-50 border border-emerald-200 font-mono font-bold text-emerald-800 text-sm">
+            <p className="h-9 flex items-center px-3 rounded-xl bg-emerald-50 border border-emerald-200/80 font-mono font-bold text-emerald-800 text-sm">
               {dinero(cambio, simboloMoneda)}
             </p>
           </div>
