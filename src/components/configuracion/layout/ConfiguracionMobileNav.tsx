@@ -22,7 +22,7 @@ export function ConfiguracionMobileNav({
   const IconoActual = itemActual?.icon || Layers;
 
   return (
-    <div className="w-full lg:hidden sticky top-[52px] z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 bg-[#F8FAFC]/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+    <div className="w-full md:hidden sticky top-0 z-30 -mx-4 sm:-mx-6 px-4 sm:px-6 py-2.5 bg-[#F8FAFC]/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
       <div className="relative">
         <label htmlFor="config-selector-global" className="sr-only">
           Cambiar sección de configuración

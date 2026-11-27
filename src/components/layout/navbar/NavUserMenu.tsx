@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronDown, LogOut, Receipt, Settings } from "lucide-react";
+import { ChevronDown, LogOut, Receipt, Settings, Maximize2, Minimize2 } from "lucide-react";
 import { salir } from "@/app/actions";
+import { useFullscreen } from "@/components/pwa/useFullscreen";
 
 interface NavUserMenuProps {
   usuario: string;
@@ -17,6 +18,8 @@ export function NavUserMenu({
   setMenuUsuarioAbierto,
   onClose,
 }: NavUserMenuProps) {
+  const { soportado, esFullscreen, alternarFullscreen } = useFullscreen();
+
   return (
     <div className="relative shrink-0">
       <button
@@ -66,6 +69,19 @@ export function NavUserMenu({
               <Settings size={13} />
               <span>Configuración</span>
             </Link>
+            {soportado && (
+              <button
+                type="button"
+                onClick={() => {
+                  alternarFullscreen();
+                  onClose();
+                }}
+                className="flex w-full items-center gap-2 rounded px-2.5 py-1.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-slate-900 cursor-pointer"
+              >
+                {esFullscreen ? <Minimize2 size={13} /> : <Maximize2 size={13} />}
+                <span>{esFullscreen ? "Salir de Pantalla Completa" : "Pantalla Completa"}</span>
+              </button>
+            )}
             <form action={salir}>
               <button
                 type="submit"

@@ -38,7 +38,7 @@ export function TemaGrid({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4.5 sm:gap-5">
         {LISTA_TEMAS.map((tema) => {
           const esActivo = temaActual.id === tema.id;
           const esElGuardado = !enVistaPrevia && esActivo;
@@ -50,56 +50,56 @@ export function TemaGrid({
               onClick={() => {
                 if (!esElGuardado && !esEnVistaPrevia) onSeleccionar(tema.id);
               }}
-              className={`group relative rounded-xl border bg-white p-4.5 shadow-xs transition-all hover:shadow-md flex flex-col justify-between h-full ${
+              className={`group relative rounded-2xl border bg-white p-5 sm:p-6 shadow-xs transition-all hover:shadow-md flex flex-col justify-between h-full ${
                 esActivo
                   ? "border-slate-900 ring-2 ring-slate-900/10"
                   : "border-slate-200/90 hover:border-slate-300 cursor-pointer"
               }`}
             >
-              <div className="flex-1 space-y-3">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex-1 space-y-3.5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <span
-                      className="h-5 w-5 rounded-full shadow-2xs border border-white shrink-0 flex items-center justify-center"
+                      className="h-6 w-6 rounded-full shadow-2xs border border-white shrink-0 flex items-center justify-center"
                       style={{ backgroundColor: tema.colorHex }}
                     >
                       {esActivo && (
-                        <Check size={11} style={{ color: tema.contrastHex }} strokeWidth={3} />
+                        <Check size={13} style={{ color: tema.contrastHex }} strokeWidth={3} />
                       )}
                     </span>
-                    <span className="text-xs font-bold text-slate-900 truncate">
+                    <span className="text-sm font-bold text-slate-900 truncate">
                       {tema.nombre}
                     </span>
                   </div>
 
                   {esElGuardado ? (
-                    <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                      <Check size={11} /> Activo
+                    <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                      <Check size={12} /> Activo
                     </span>
                   ) : esEnVistaPrevia ? (
-                    <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200 flex items-center gap-1 animate-pulse">
-                      <Eye size={11} /> Previsualizando
+                    <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-bold text-amber-700 border border-amber-200 flex items-center gap-1 animate-pulse">
+                      <Eye size={12} /> Previsualizando
                     </span>
                   ) : (
-                    <span className="shrink-0 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500 border border-slate-200">
+                    <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-500 border border-slate-200">
                       Disponible
                     </span>
                   )}
                 </div>
 
-                <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed min-h-[34px]">
                   {tema.descripcion}
                 </p>
 
-                <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-slate-50 border border-slate-100">
-                  <div className="h-4 flex-1 rounded shadow-2xs" style={{ backgroundColor: tema.colorHex }} title="Color Principal" />
-                  <div className="h-4 flex-1 rounded shadow-2xs" style={{ backgroundColor: tema.hoverHex }} title="Color Hover" />
-                  <div className="h-4 flex-1 rounded shadow-2xs border border-slate-200" style={{ backgroundColor: tema.accentLightHex }} title="Acento Claro" />
-                  <div className="h-4 flex-1 rounded shadow-2xs" style={{ backgroundColor: tema.contrastHex }} title="Contraste" />
+                <div className="flex items-center gap-2 p-2 rounded-xl bg-slate-50 border border-slate-100/90">
+                  <div className="h-5 flex-1 rounded-md shadow-2xs" style={{ backgroundColor: tema.colorHex }} title="Color Principal" />
+                  <div className="h-5 flex-1 rounded-md shadow-2xs" style={{ backgroundColor: tema.hoverHex }} title="Color Hover" />
+                  <div className="h-5 flex-1 rounded-md shadow-2xs border border-slate-200" style={{ backgroundColor: tema.accentLightHex }} title="Acento Claro" />
+                  <div className="h-5 flex-1 rounded-md shadow-2xs" style={{ backgroundColor: tema.contrastHex }} title="Contraste" />
                 </div>
               </div>
 
-              <div className="pt-3 mt-3 border-t border-slate-100">
+              <div className="pt-4 mt-4 border-t border-slate-100">
                 <TemaCardActions
                   tema={tema}
                   esElGuardado={esElGuardado}

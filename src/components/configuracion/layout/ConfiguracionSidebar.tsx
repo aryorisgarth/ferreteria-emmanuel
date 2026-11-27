@@ -17,7 +17,7 @@ export function ConfiguracionSidebar({
 }: ConfiguracionSidebarProps) {
   return (
     <aside
-      className={`w-64 shrink-0 rounded-xl border border-slate-200/90 bg-white p-3 shadow-xs sticky top-[68px] self-start max-h-[calc(100dvh-88px)] overflow-y-auto overscroll-contain select-none z-20 ${className}`}
+      className={`w-60 lg:w-64 shrink-0 rounded-xl border border-slate-200/90 bg-white p-3 shadow-xs sticky top-3 self-start max-h-[calc(100dvh-80px)] overflow-y-auto overscroll-contain select-none z-20 ${className}`}
     >
       <div className="space-y-4">
         {GRUPOS_CONFIGURACION.map((grupo) => (

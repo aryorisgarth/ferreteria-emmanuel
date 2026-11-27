@@ -2,19 +2,20 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "/?pwa=emmanuel",
+    id: "/",
     name: "Ferretería Emmanuel",
     short_name: "Emmanuel",
     description: "Sistema Integral de Gestión Comercial, Punto de Venta (POS) y Control de Bodega de Ferretería Emmanuel.",
-    start_url: "/?mode=standalone",
+    start_url: "/",
     scope: "/",
-    display: "fullscreen",
-    display_override: ["fullscreen", "standalone", "window-controls-overlay", "minimal-ui"],
+    display: "standalone",
+    display_override: ["standalone", "fullscreen", "window-controls-overlay", "minimal-ui"],
     orientation: "any",
     background_color: "#0F172A",
     theme_color: "#0F172A",
     lang: "es-NI",
     dir: "ltr",
+    prefer_related_applications: false,
     categories: ["business", "finance", "productivity", "utilities"],
     icons: [
       {

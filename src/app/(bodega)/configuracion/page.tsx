@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Aviso, PageDocument } from "@/components/documentos/Pieza";
+import { Aviso } from "@/components/documentos/Pieza";
 import { PanelConfiguracion } from "@/components/configuracion/PanelConfiguracion";
 import { obtenerConfiguracion } from "@/lib/config";
 import { exigirSesion } from "@/lib/auth";
@@ -27,10 +27,7 @@ export default async function ConfiguracionPage({
   ]);
 
   return (
-    <PageDocument
-      seccion="Administración"
-      titulo="Centro de Configuración y Parámetros"
-    >
+    <article className="w-full max-w-full overflow-x-clip px-3.5 py-4 sm:px-6 md:px-8 max-w-[1750px] mx-auto print:p-0">
       {sp.aviso ? <Aviso tono="azul">{sp.aviso}</Aviso> : null}
       {sp.error ? <Aviso tono="rojo">{sp.error}</Aviso> : null}
       <PanelConfiguracion
@@ -38,6 +35,6 @@ export default async function ConfiguracionPage({
         modoDb={modoDb}
         tabInicial={sp.tab}
       />
-    </PageDocument>
+    </article>
   );
 }

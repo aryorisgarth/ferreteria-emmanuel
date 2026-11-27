@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Menu, Settings, ShoppingCart, X } from "lucide-react";
 import { NavSearchBar } from "./NavSearchBar";
 import { NavUserMenu } from "./NavUserMenu";
+import { BotonFullscreen } from "@/components/pwa/BotonFullscreen";
 
 interface Props {
   usuario: string;
@@ -55,6 +56,9 @@ export function NavActionsRight({
       >
         <Settings size={14} style={{ color: "var(--theme-header-icon, #334155)" }} />
       </Link>
+      <BotonFullscreen
+        className="flex h-8 w-8 items-center justify-center rounded-md border !p-0 !bg-transparent hover:!bg-slate-100 !border-[var(--theme-header-border,#E2E8F0)] !text-[var(--theme-header-icon,#334155)] shadow-none shrink-0"
+      />
       <NavUserMenu
         usuario={usuario}
         menuUsuarioAbierto={menuUsuarioAbierto}

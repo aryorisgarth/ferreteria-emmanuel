@@ -23,24 +23,24 @@ export function TemaCardActions({
 }: TemaCardActionsProps) {
   if (esElGuardado) {
     return (
-      <div className="flex items-center justify-center py-1.5 text-[11px] font-semibold text-emerald-700 bg-emerald-50/60 rounded-lg border border-emerald-100">
-        <Check size={12} className="mr-1" /> Tema activo
+      <div className="flex items-center justify-center py-2 text-xs font-bold text-emerald-700 bg-emerald-50/80 rounded-xl border border-emerald-200/80">
+        <Check size={14} className="mr-1.5" /> Tema Activo en este Terminal
       </div>
     );
   }
 
   if (esEnVistaPrevia) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
             onCancelarPreview?.();
           }}
-          className="flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center gap-1 cursor-pointer transition active:scale-95"
+          className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95"
         >
-          <X size={12} />
+          <X size={13} />
           Cancelar
         </button>
         <button
@@ -49,10 +49,10 @@ export function TemaCardActions({
             e.stopPropagation();
             onGuardar(tema.id);
           }}
-          className="flex-1 py-1.5 px-3 rounded-lg text-[11px] font-bold shadow-xs flex items-center justify-center gap-1 cursor-pointer transition active:scale-95"
+          className="flex-1 py-2 px-3.5 rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95"
           style={{ backgroundColor: tema.colorHex, color: tema.contrastHex }}
         >
-          <Check size={12} />
+          <Check size={13} />
           Fijar
         </button>
       </div>
@@ -60,16 +60,16 @@ export function TemaCardActions({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           onSeleccionar(tema.id);
         }}
-        className="flex-1 py-1.5 px-2.5 rounded-lg text-[11px] font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center gap-1 cursor-pointer transition"
+        className="flex-1 py-2 px-3 rounded-xl text-xs font-bold bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center gap-1.5 cursor-pointer transition active:scale-95"
       >
-        <Eye size={12} />
+        <Eye size={13} />
         Previsualizar
       </button>
       <button
@@ -78,10 +78,10 @@ export function TemaCardActions({
           e.stopPropagation();
           onGuardar(tema.id);
         }}
-        className="py-1.5 px-3 rounded-lg text-[11px] font-bold shadow-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+        className="py-2 px-3.5 rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer transition active:scale-95"
         style={{ backgroundColor: tema.colorHex, color: tema.contrastHex }}
       >
-        <Check size={12} />
+        <Check size={13} />
         Fijar
       </button>
     </div>

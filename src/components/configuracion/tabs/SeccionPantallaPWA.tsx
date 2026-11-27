@@ -5,10 +5,12 @@ import { Smartphone, Sun, Download, AlertCircle, Maximize2, Minimize2 } from "lu
 import { useWakeLockContext } from "@/components/pwa/WakeLockProvider";
 import { useFullscreen } from "@/components/pwa/useFullscreen";
 
+type ModoPwa = "standalone" | "custom_tab" | "browser";
+
 export function SeccionPantallaPWA() {
   const { soportado: wakeLockSoportado, activo, habilitado, toggleWakeLock } = useWakeLockContext();
   const { soportado: fullscreenSoportado, esFullscreen, alternarFullscreen } = useFullscreen();
-  const [instalado, setInstalado] = useState(false);
+  const [modo, setModo] = useState<ModoPwa>("browser");
   const [esIOS, setEsIOS] = useState(false);
 
   useEffect(() => {
@@ -17,7 +19,15 @@ export function SeccionPantallaPWA() {
         window.matchMedia("(display-mode: standalone)").matches ||
         window.matchMedia("(display-mode: fullscreen)").matches ||
         (window.navigator as any).standalone === true;
-      setInstalado(esStandalone);
+
+      const esAndroid = /Android/i.test(navigator.userAgent);
+      if (esStandalone) {
+        setModo("standalone");
+      } else if (esAndroid && document.referrer.startsWith("android-app://")) {
+        setModo("custom_tab");
+      } else {
+        setModo("browser");
+      }
       setEsIOS(/iPad|iPhone|iPod/.test(navigator.userAgent));
     }
   }, []);
@@ -28,17 +38,23 @@ export function SeccionPantallaPWA() {
         <div className="flex items-center gap-2">
           <Smartphone size={16} className="text-slate-600" />
           <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-            Pantalla y Aplicación Instalable (PWA)
+            Pantalla y Experiencia PWA
           </h3>
         </div>
         <span
           className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold ${
-            instalado
+            modo === "standalone"
               ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-              : "bg-amber-50 text-amber-700 border border-amber-200"
+              : modo === "custom_tab"
+              ? "bg-amber-50 text-amber-700 border border-amber-200"
+              : "bg-blue-50 text-blue-700 border border-blue-200"
           }`}
         >
-          {instalado ? "Modo App Instalada" : "Modo Navegador Web"}
+          {modo === "standalone"
+            ? "PWA Instalada (Standalone)"
+            : modo === "custom_tab"
+            ? "Chrome Custom Tab (Acceso Directo)"
+            : "Navegador Web"}
         </span>
       </div>
 
@@ -104,19 +120,19 @@ export function SeccionPantallaPWA() {
           </button>
         </div>
 
-        {/* Guía de Instalación según dispositivo */}
-        {!instalado && (
-          <div className="p-3 rounded-lg bg-blue-50/60 border border-blue-200/60 text-xs text-blue-900 space-y-1">
+        {/* Guía de Instalación y Diagnóstico de barra de navegador */}
+        {modo !== "standalone" && (
+          <div className="p-3 rounded-lg bg-blue-50/60 border border-blue-200/60 text-xs text-blue-900 space-y-1.5">
             <div className="flex items-center gap-1.5 font-bold text-blue-950">
-              <Download size={14} /> Cómo Instalar Ferretería Emmanuel:
+              <Download size={14} /> Cómo eliminar la barra de dirección y dominio en tablets:
             </div>
             {esIOS ? (
               <p className="text-[11px] text-blue-800">
-                En Safari iOS: pulsa <strong>Compartir</strong> (icono de cuadrado con flecha hacia arriba) y selecciona <strong>«Agregar al inicio»</strong>.
+                En Safari iOS: pulsa <strong>Compartir</strong> y selecciona <strong>«Agregar al inicio»</strong>.
               </p>
             ) : (
               <p className="text-[11px] text-blue-800">
-                En Chrome (Galaxy Tab / Android / PC): pulsa el menú de tres puntos (⋮) y selecciona <strong>«Instalar aplicación»</strong> (no «Agregar a pantalla principal»).
+                En Chrome (Galaxy Tab / Android): Para quitar la barra superior de Vercel, active <strong>Pantalla Completa</strong> (en la cabecera superior o aquí arriba), o instale la app desde el menú de tres puntos (⋮) con <strong>«Instalar aplicación»</strong>.
               </p>
             )}
           </div>
