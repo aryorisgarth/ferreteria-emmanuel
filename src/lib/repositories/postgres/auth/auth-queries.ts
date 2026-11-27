@@ -85,17 +85,35 @@ export async function dbBuscarPorId(executor: SqlExecutor, id: string): Promise<
   };
 }
 
-export async function dbObtenerTemaUsuario(executor: SqlExecutor, usuarioOId: string): Promise<string> {
-  try {
-    const clean = usuarioOId.trim().toLowerCase();
-    const res = await executor.query(
-      `SELECT tema FROM usuarios_cuentas WHERE LOWER(usuario) = $1 OR id = $1 LIMIT 1`,
-      [clean]
+async function asegurarTablaUsuarios(executor: SqlExecutor): Promise<void> {
+  await executor.query(`
+    CREATE TABLE IF NOT EXISTS usuarios_cuentas (
+      id TEXT PRIMARY KEY, usuario TEXT UNIQUE NOT NULL, nombre TEXT NOT NULL DEFAULT '',
+      rol TEXT NOT NULL DEFAULT 'admin', clave TEXT NOT NULL DEFAULT '', activo BOOLEAN NOT NULL DEFAULT true,
+      tema TEXT NOT NULL DEFAULT 'emmanuel', creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
-    return res.rows.length > 0 && res.rows[0].tema ? String(res.rows[0].tema) : "emmanuel";
-  } catch {
-    return "emmanuel";
+    ALTER TABLE usuarios_cuentas ADD COLUMN IF NOT EXISTS tema TEXT NOT NULL DEFAULT 'emmanuel';
+  `);
+}
+
+export async function dbObtenerTemaUsuario(executor: SqlExecutor, usuarioOId: string): Promise<string> {
+  const clean = usuarioOId.trim().toLowerCase();
+  for (let i = 0; i < 2; i++) {
+    try {
+      const res = await executor.query(
+        `SELECT tema FROM usuarios_cuentas WHERE LOWER(usuario) = $1 OR id = $1 LIMIT 1`, [clean]
+      );
+      return res.rows.length > 0 && res.rows[0].tema ? String(res.rows[0].tema) : "emmanuel";
+    } catch (err: any) {
+      if (i === 0 && (err?.code === "42P01" || err?.code === "42703")) {
+        await asegurarTablaUsuarios(executor).catch(() => {});
+        continue;
+      }
+      return "emmanuel";
+    }
   }
+  return "emmanuel";
 }
 
 export async function dbGuardarTemaUsuario(
@@ -103,24 +121,30 @@ export async function dbGuardarTemaUsuario(
   usuarioOId: string,
   tema: string
 ): Promise<boolean> {
-  try {
-    const clean = usuarioOId.trim().toLowerCase();
-    const res = await executor.query(
-      `UPDATE usuarios_cuentas SET tema = $2, actualizado_en = NOW() WHERE LOWER(usuario) = $1 OR id = $1`,
-      [clean, tema]
-    );
-    if ((res.rowCount ?? 0) > 0) return true;
+  const clean = usuarioOId.trim().toLowerCase();
+  for (let i = 0; i < 2; i++) {
+    try {
+      const res = await executor.query(
+        `UPDATE usuarios_cuentas SET tema = $2, actualizado_en = NOW() WHERE LOWER(usuario) = $1 OR id = $1`,
+        [clean, tema]
+      );
+      if ((res.rowCount ?? 0) > 0) return true;
 
-    // UPSERT seguro si la fila no existía en esta base de datos
-    const up = await executor.query(
-      `INSERT INTO usuarios_cuentas (id, usuario, nombre, rol, clave, activo, tema, creado_en, actualizado_en)
-       VALUES ($1, $1, $1, 'admin', '$scrypt$theme_managed', true, $2, NOW(), NOW())
-       ON CONFLICT (usuario) DO UPDATE SET tema = EXCLUDED.tema, actualizado_en = NOW()`,
-      [clean, tema]
-    );
-    return (up.rowCount ?? 0) > 0;
-  } catch (err) {
-    console.warn("[Tema] Error al persistir tema en PostgreSQL:", err);
-    return false;
+      const up = await executor.query(
+        `INSERT INTO usuarios_cuentas (id, usuario, nombre, rol, clave, activo, tema, creado_en, actualizado_en)
+         VALUES ($1, $1, $1, 'admin', '$scrypt$theme_managed', true, $2, NOW(), NOW())
+         ON CONFLICT (usuario) DO UPDATE SET tema = EXCLUDED.tema, actualizado_en = NOW()`,
+        [clean, tema]
+      );
+      return (up.rowCount ?? 0) > 0;
+    } catch (err: any) {
+      if (i === 0 && (err?.code === "42P01" || err?.code === "42703")) {
+        await asegurarTablaUsuarios(executor).catch(() => {});
+        continue;
+      }
+      console.warn("[Tema] Error al persistir tema en PostgreSQL:", err);
+      return false;
+    }
   }
+  return false;
 }
