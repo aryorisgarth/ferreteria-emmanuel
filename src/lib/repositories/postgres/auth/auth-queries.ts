@@ -69,15 +69,9 @@ export async function dbBuscarPorId(executor: SqlExecutor, id: string): Promise<
   if (res.rows.length === 0) return null;
   const r = res.rows[0];
   return {
-    id: r.id,
-    usuario: r.usuario,
-    nombre: r.nombre,
-    rol: rolFromDb(r.rol),
-    passwordHash: r.passwordHash,
-    activo: r.activo ?? true,
-    correo: r.correo || null,
-    debeCambiarClave: r.debeCambiarClave ?? false,
-    versionCredencial: r.versionCredencial ?? 1,
+    id: r.id, usuario: r.usuario, nombre: r.nombre, rol: rolFromDb(r.rol),
+    passwordHash: r.passwordHash, activo: r.activo ?? true, correo: r.correo || null,
+    debeCambiarClave: r.debeCambiarClave ?? false, versionCredencial: r.versionCredencial ?? 1,
     intentosFallidos: r.intentos_fallidos ?? 0,
     bloqueadoHasta: r.bloqueado_hasta ? new Date(r.bloqueado_hasta).toISOString() : null,
     ultimoAcceso: r.ultimo_acceso ? new Date(r.ultimo_acceso).toISOString() : null,
@@ -133,7 +127,7 @@ export async function dbGuardarTemaUsuario(
       const up = await executor.query(
         `INSERT INTO usuarios_cuentas (id, usuario, nombre, rol, clave, activo, tema, creado_en, actualizado_en)
          VALUES ($1, $1, $1, 'admin', '$scrypt$theme_managed', true, $2, NOW(), NOW())
-         ON CONFLICT (usuario) DO UPDATE SET tema = EXCLUDED.tema, actualizado_en = NOW()`,
+         ON CONFLICT (id) DO UPDATE SET tema = EXCLUDED.tema, actualizado_en = NOW()`,
         [clean, tema]
       );
       return (up.rowCount ?? 0) > 0;

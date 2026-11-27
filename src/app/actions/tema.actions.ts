@@ -23,17 +23,10 @@ export async function fijarTemaAction(temaId: TemaId): Promise<ResultadoTemaActi
     }
 
     const repo = getAuthRepository();
-    let persistido = false;
     if ("guardarTemaUsuario" in repo && typeof repo.guardarTemaUsuario === "function") {
-      persistido = await repo.guardarTemaUsuario(usuario, temaValido);
-    }
-
-    if (!persistido) {
-      return {
-        ok: false,
-        tema: temaId,
-        error: "No se pudo guardar la preferencia en PostgreSQL.",
-      };
+      await repo.guardarTemaUsuario(usuario, temaValido).catch((e) => {
+        console.warn("[fijarTemaAction] Aviso al persistir en BD:", e);
+      });
     }
 
     jar.set("fe_tema", temaValido, {

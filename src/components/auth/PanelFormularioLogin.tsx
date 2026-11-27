@@ -33,19 +33,18 @@ export function PanelFormularioLogin({
         <button
           type="button"
           onClick={onOcultar}
-          title="Ocultar formulario y ver maqueta"
-          aria-label="Ocultar formulario"
-          className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 transition cursor-pointer"
+          aria-label="Ver maqueta"
+          className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 transition cursor-pointer"
         >
-          <ChevronRight size={18} />
+          <ChevronRight size={20} />
         </button>
       </div>
 
       {/* Formulario centrado con logo grande en medio */}
       <div className="flex-1 flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-[460px] space-y-6">
-          <div className="flex justify-center">
-            <Logo variante="color" className="h-12 sm:h-14 w-auto" prioridad />
+          <div className="flex justify-center my-2">
+            <Logo variante="color" className="h-14 sm:h-16 w-auto" prioridad />
           </div>
 
           <div className="space-y-1 text-center">
