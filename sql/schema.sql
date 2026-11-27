@@ -38,12 +38,14 @@ CREATE TABLE IF NOT EXISTS usuarios_cuentas (
     rol TEXT NOT NULL CHECK (rol IN ('admin', 'bodega', 'auditor', 'solicitante', 'cajero', 'vendedor')),
     clave TEXT NOT NULL, -- Soporta formato $scrypt$ o SHA-256 legacy
     activo BOOLEAN NOT NULL DEFAULT true,
+    tema TEXT NOT NULL DEFAULT 'emmanuel',
     creado_en TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     actualizado_en TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_usuarios_cuentas_usuario ON usuarios_cuentas(usuario);
 CREATE INDEX IF NOT EXISTS idx_usuarios_cuentas_rol ON usuarios_cuentas(rol);
+CREATE INDEX IF NOT EXISTS idx_usuarios_cuentas_tema ON usuarios_cuentas(tema);
 
 -- ============================================================================
 -- 3. CONSECUTIVOS Y FOLIOS (GENERACIÓN ATÓMICA DE NÚMEROS DE DOCUMENTO)
