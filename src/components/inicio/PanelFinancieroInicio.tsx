@@ -11,59 +11,82 @@ export function PanelFinancieroInicio({ resumen }: { resumen: any }) {
 
   return (
     <div className="mt-3 grid gap-3 lg:grid-cols-3">
-      {/* Panel Financiero */}
-      <div className="bg-slate-900 text-white rounded-md p-3.5 sm:p-5 border border-slate-800 lg:col-span-2 flex flex-col justify-between">
+      {/* Panel Financiero - Glassmorphism Suave tipo iOS */}
+      <div
+        className="rounded-2xl p-4 sm:p-5 border lg:col-span-2 flex flex-col justify-between shadow-xs transition-all backdrop-blur-md"
+        style={{
+          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, var(--theme-accent-light) 100%)",
+          borderColor: "var(--theme-accent-border)",
+        }}
+      >
         <div>
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-            <div className="flex items-center gap-2 text-slate-200 text-xs font-bold uppercase tracking-wider">
-              <TrendingUp size={15} className="text-blue-400" />
+          <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--theme-accent-border)" }}>
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider" style={{ color: "var(--theme-header-text)" }}>
+              <TrendingUp size={16} style={{ color: "var(--theme-primary)" }} />
               Margen y Rentabilidad del Período
             </div>
-            <span className="text-[10px] text-slate-400 font-mono">Costo histórico Kárdex</span>
+            <span className="text-[10px] text-slate-500 font-medium px-2 py-0.5 rounded-full bg-white/80 border border-slate-200/70 shadow-2xs">
+              Costo histórico Kárdex
+            </span>
           </div>
+
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Ventas Netas</p>
-              <p className="text-lg font-bold font-mono text-white mt-0.5">{ventasNetas}</p>
-              <p className="text-[10px] text-slate-500">Sin incluir IVA</p>
+            <div className="bg-white/85 p-3 rounded-xl border border-slate-200/70 shadow-2xs backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ventas Netas</p>
+              <p className="text-lg font-black font-mono text-slate-900 mt-0.5">{ventasNetas}</p>
+              <p className="text-[10px] text-slate-400">Sin incluir IVA</p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Costo Mercadería</p>
-              <p className="text-lg font-bold font-mono text-rose-300 mt-0.5">{costoHoy}</p>
-              <p className="text-[10px] text-slate-500">CPP Ponderado</p>
+            <div className="bg-white/85 p-3 rounded-xl border border-slate-200/70 shadow-2xs backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Costo Mercadería</p>
+              <p className="text-lg font-black font-mono text-rose-600 mt-0.5">{costoHoy}</p>
+              <p className="text-[10px] text-slate-400">CPP Ponderado</p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Utilidad Bruta</p>
-              <p className="text-lg font-bold font-mono text-emerald-400 mt-0.5">{utilidadBruta}</p>
-              <p className="text-[10px] text-slate-500">Ventas − Costo</p>
+            <div className="bg-white/85 p-3 rounded-xl border border-slate-200/70 shadow-2xs backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Utilidad Bruta</p>
+              <p className="text-lg font-black font-mono text-emerald-600 mt-0.5">{utilidadBruta}</p>
+              <p className="text-[10px] text-slate-400">Ventas − Costo</p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Utilidad Neta</p>
-              <p className="text-lg font-bold font-mono text-blue-400 mt-0.5">{utilidadNeta}</p>
-              <p className="text-[10px] text-slate-500">Turno de caja</p>
+            <div className="bg-white/85 p-3 rounded-xl border border-slate-200/70 shadow-2xs backdrop-blur-sm">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Utilidad Neta</p>
+              <p className="text-lg font-black font-mono mt-0.5" style={{ color: "var(--theme-primary)" }}>{utilidadNeta}</p>
+              <p className="text-[10px] text-slate-400">Turno de caja</p>
             </div>
           </div>
         </div>
-        <div className="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
-          <span>Mes acumulado: <strong className="text-white">{utilidadMes}</strong> Utilidad Bruta</span>
-          <Link href="/reportes" className="text-blue-400 hover:text-blue-300 hover:underline">Informe detallado →</Link>
+
+        <div className="mt-4 pt-3 border-t text-[11px] flex items-center justify-between" style={{ borderColor: "var(--theme-accent-border)" }}>
+          <span className="text-slate-600">
+            Mes acumulado: <strong className="text-slate-900">{utilidadMes}</strong> Utilidad Bruta
+          </span>
+          <Link
+            href="/reportes"
+            className="font-bold hover:underline transition"
+            style={{ color: "var(--theme-primary)" }}
+          >
+            Informe detallado →
+          </Link>
         </div>
       </div>
 
-      {/* Estado del Turno de Caja */}
-      <div className="card p-3.5 sm:p-5 flex flex-col justify-between">
+      {/* Estado del Turno de Caja - Glassmorphism Suave tipo iOS */}
+      <div
+        className="rounded-2xl p-4 sm:p-5 border flex flex-col justify-between shadow-xs transition-all bg-white/95 backdrop-blur-md"
+        style={{ borderColor: "var(--theme-accent-border)" }}
+      >
         <div>
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: "var(--theme-accent-border)" }}>
             <div className="flex items-center gap-2">
-              <Wallet size={15} className="text-slate-600" />
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700">Estado de Caja</h3>
+              <Wallet size={16} style={{ color: "var(--theme-primary)" }} />
+              <h3 className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--theme-header-text)" }}>
+                Estado de Caja
+              </h3>
             </div>
             {resumen.turno ? (
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                 ● ABIERTA
               </span>
             ) : (
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
                 CERRADA
               </span>
             )}
@@ -71,15 +94,15 @@ export function PanelFinancieroInicio({ resumen }: { resumen: any }) {
 
           {resumen.turno ? (
             <div className="mt-3 space-y-2 text-xs">
-              <div className="flex justify-between py-1 border-b border-slate-50">
+              <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500">Cajero en turno:</span>
                 <span className="font-bold text-slate-800">{resumen.turno.usuario}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
+              <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500">Fondo Inicial:</span>
                 <span className="font-mono font-semibold text-slate-800">{dinero(resumen.turno.montoInicial)}</span>
               </div>
-              <div className="flex justify-between py-1 border-b border-slate-50">
+              <div className="flex justify-between py-1 border-b border-slate-100">
                 <span className="text-slate-500">Ventas Efectivo:</span>
                 <span className="font-mono font-bold text-emerald-600">{dinero(resumen.turno.totalVentasEfectivo || 0)}</span>
               </div>
@@ -96,16 +119,20 @@ export function PanelFinancieroInicio({ resumen }: { resumen: any }) {
           )}
         </div>
 
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+        <div className="pt-3 border-t flex items-center justify-between text-xs" style={{ borderColor: "var(--theme-accent-border)" }}>
           {resumen.turno ? (
             <>
               <span className="text-slate-400 font-medium">Operación en curso</span>
-              <Link href="/total-del-dia" className="font-bold text-slate-700 hover:text-slate-900 transition">
+              <Link href="/total-del-dia" className="font-bold hover:underline transition" style={{ color: "var(--theme-primary)" }}>
                 Ver Arqueo →
               </Link>
             </>
           ) : (
-            <Link href="/caja" className="w-full btn btn-navy h-8 text-xs font-bold justify-center">
+            <Link
+              href="/caja"
+              className="w-full h-9 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition active:scale-[0.99] cursor-pointer"
+              style={{ backgroundColor: "var(--theme-primary)", color: "var(--theme-primary-contrast)" }}
+            >
               Abrir Turno de Caja
             </Link>
           )}
